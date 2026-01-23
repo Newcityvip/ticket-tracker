@@ -1,558 +1,443 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ticket Tracking</title>
-
   <style>
     :root{
-      --bg:#f6f8fb;
+      --bg:#f6f7fb;
       --card:#ffffff;
       --text:#0f172a;
       --muted:#64748b;
-      --line:#e2e8f0;
-      --btn:#0f172a;
-      --btnText:#fff;
-      --pill:#eef2ff;
-      --shadow: 0 10px 30px rgba(2,6,23,.08);
-      --radius:16px;
+      --border:#e2e8f0;
+      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
+      --radius: 18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: var(--bg);
-      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 50% 0%, #eef2ff 0%, var(--bg) 60%);
+      color:var(--text);
     }
-    .wrap{
-      max-width: 980px;
-      margin: 40px auto 80px;
-      padding: 0 16px;
+    .wrap{max-width:980px;margin:0 auto;padding:34px 18px 60px}
+    .top{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+      margin-bottom:18px;
     }
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:22px;
-    }
-    .title h1{
-      margin:0;
-      font-size: 40px;
-      letter-spacing:-.02em;
-    }
-    .title p{
-      margin:6px 0 0;
-      color: var(--muted);
-    }
-    .top-actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+    h1{margin:0;font-size:44px;letter-spacing:-.02em}
+    .sub{margin-top:6px;color:var(--muted);font-size:14px}
     .btn{
-      border:0;
-      background: var(--btn);
-      color: var(--btnText);
-      padding: 10px 14px;
-      border-radius: 12px;
+      border:1px solid var(--border);
+      background:#0b1220;
+      color:#fff;
+      padding:12px 16px;
+      border-radius:999px;
       cursor:pointer;
       font-weight:600;
+      box-shadow: 0 12px 22px rgba(0,0,0,.08);
     }
     .btn.secondary{
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
+      background:#fff;color:#0b1220;
+      box-shadow:none;
     }
     .grid{
       display:grid;
-      gap:16px;
       grid-template-columns: 1fr;
-    }
-    @media (min-width: 880px){
-      .grid{
-        grid-template-columns: 1fr;
-      }
+      gap:14px;
+      margin-top:18px;
     }
     .card{
-      background: var(--card);
-      border-radius: var(--radius);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
       box-shadow: var(--shadow);
-      border: 1px solid rgba(226,232,240,.8);
       overflow:hidden;
     }
-    .card .hd{
-      padding: 18px 18px 12px;
-      border-bottom: 1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+    .cardHeader{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
     }
-    .card .hd h2{
-      margin:0;
-      font-size: 18px;
-      letter-spacing:-.01em;
-    }
+    .cardTitle{font-weight:800}
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:12px;
       font-weight:700;
-      font-size: 12px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
+      letter-spacing:.02em;
+      background:#fff;
     }
-    .pill.status{ background: var(--pill); border-color: #c7d2fe; }
-    .pill.ok{ background:#ecfdf5; border-color:#a7f3d0; }
-    .pill.warn{ background:#fff7ed; border-color:#fed7aa; }
-    .pill.bad{ background:#fef2f2; border-color:#fecaca; }
-    .card .bd{
-      padding: 18px;
+    .pill.dot::before{
+      content:"";
+      width:8px;height:8px;border-radius:999px;
+      background:#94a3b8;
+      display:inline-block;
     }
-    .meta{
+    .pill.OPEN.dot::before{background:#f59e0b}
+    .pill.IN_PROGRESS.dot::before{background:#3b82f6}
+    .pill.SOLVED.dot::before{background:#22c55e}
+    .pill.CLOSED.dot::before{background:#22c55e}
+    .pill.UNKNOWN.dot::before{background:#94a3b8}
+
+    .content{padding:18px}
+    .kv{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px 22px;
-      margin-top: 10px;
+      gap:14px 16px;
     }
-    .meta .k{
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    .meta .v{
-      font-size: 14px;
-      font-weight: 650;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .k{color:var(--muted);font-size:12px;margin-bottom:6px}
+    .v{font-weight:750}
     .desc{
-      margin-top: 14px;
-    }
-    .desc .k{ font-size:12px; color:var(--muted); margin-bottom:6px; }
-    .desc .v{
-      font-size: 14px;
-      line-height: 1.45;
-      background:#f8fafc;
-      border:1px solid var(--line);
-      padding: 12px;
-      border-radius: 12px;
+      margin-top:14px;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:14px;
+      color:#0f172a;
+      background:#fbfdff;
       white-space:pre-wrap;
     }
-
-    .subline{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
+    .meta{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      align-items:center;
     }
-    .dot{ opacity:.6; }
-
-    .alert{
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #fecaca;
-      background: #fef2f2;
-      color:#991b1b;
-      font-weight:600;
-      font-size: 13px;
+    .error{
+      margin-top:12px;
+      background:#fff1f2;
+      border:1px solid #fecdd3;
+      color:#9f1239;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:650;
     }
 
-    /* Replies */
-    .replies{
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
+    .replyHeader{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
     }
-    .reply{
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      background: #fff;
+    .count{font-size:12px;color:var(--muted);font-weight:700}
+    .thread{padding:14px 18px 18px; display:flex; flex-direction:column; gap:10px;}
+    .msg{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:16px;
+      padding:12px 12px;
+      max-width: 760px;
     }
-    .reply .top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      margin-bottom: 8px;
+    .msg .topline{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;margin-bottom:6px;
+      font-size:12px;color:var(--muted);
     }
-    .reply .from{
-      font-weight:800;
-      font-size: 13px;
+    .msg .who{font-weight:800;color:#0f172a}
+    .msg .txt{white-space:pre-wrap; line-height:1.45}
+    .msg.system{
+      background:#f8fafc;
+      border-style:dashed;
     }
-    .reply .time{
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-    }
-    .reply .text{
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-    .empty{
-      color: var(--muted);
-      font-size: 13px;
-      padding: 10px 2px;
+    .msg.private{
+      background:#fff7ed;
+      border-color:#fed7aa;
     }
 
-    /* Modal */
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background: rgba(2,6,23,.5);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      z-index: 50;
+    .toolbar{
+      display:flex; gap:10px; align-items:center;
     }
-    .modal{
-      width: min(520px, 100%);
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(226,232,240,.8);
-      overflow:hidden;
-    }
-    .modal .mh{
-      padding: 16px 16px 10px;
-      border-bottom: 1px solid var(--line);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 10px;
-    }
-    .modal .mh h3{ margin:0; font-size: 16px; }
-    .modal .mb{ padding: 16px; }
-    .modal label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
-    .modal input{
-      width:100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      outline:none;
-      font-size: 15px;
-    }
-    .modal .ma{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      padding: 0 16px 16px;
+
+    @media (max-width: 720px){
+      h1{font-size:34px}
+      .kv{grid-template-columns:1fr}
+      .top{flex-direction:column}
+      .btn{width:100%}
     }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <header>
-      <div class="title">
+    <div class="top">
+      <div>
         <h1>Ticket Tracking</h1>
-        <p>Track status and support replies using your ticket code.</p>
+        <div class="sub">Track status and support replies using your ticket code.</div>
       </div>
-      <div class="top-actions">
-        <button class="btn" id="btnChange">Change code</button>
-      </div>
-    </header>
+      <button class="btn" id="changeBtn">Change code</button>
+    </div>
 
     <div class="grid">
-      <section class="card">
-        <div class="hd">
-          <h2>Ticket</h2>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <span class="pill status" id="pillStatus">—</span>
-            <button class="btn secondary" id="btnRefresh">Refresh</button>
+      <div class="card">
+        <div class="cardHeader">
+          <div class="cardTitle">Ticket</div>
+          <div class="toolbar">
+            <span class="pill dot UNKNOWN" id="statusPill">UNKNOWN</span>
+            <button class="btn secondary" id="refreshBtn">Refresh</button>
           </div>
         </div>
-        <div class="bd">
-          <div class="meta">
+
+        <div class="content">
+          <div class="kv">
             <div>
               <div class="k">Ticket Code</div>
-              <div class="v" id="vCode">—</div>
+              <div class="v" id="codeEl">—</div>
             </div>
             <div>
               <div class="k">Priority</div>
-              <div class="v" id="vPriority">—</div>
+              <div class="v" id="prioEl">—</div>
             </div>
 
             <div>
               <div class="k">Subject</div>
-              <div class="v" id="vSubject">—</div>
+              <div class="v" id="subjEl">—</div>
             </div>
             <div>
               <div class="k">Last Updated</div>
-              <div class="v" id="vUpdated">—</div>
+              <div class="v" id="updEl">—</div>
             </div>
 
             <div>
               <div class="k">Created</div>
-              <div class="v" id="vCreated">—</div>
+              <div class="v" id="crtEl">—</div>
             </div>
             <div>
               <div class="k">Closed</div>
-              <div class="v" id="vClosed">—</div>
+              <div class="v" id="clsEl">—</div>
             </div>
           </div>
 
-          <div class="desc">
-            <div class="k">Description</div>
-            <div class="v" id="vDesc">—</div>
-          </div>
+          <div class="k" style="margin-top:14px">Description</div>
+          <div class="desc" id="descEl">—</div>
 
-          <div id="alertBox" class="alert" style="display:none;"></div>
-
-          <div class="subline">
+          <div class="meta">
             <span>Auto refresh: every <b>20s</b></span>
-            <span class="dot">•</span>
+            <span>•</span>
             <span>Last checked: <span id="lastChecked">—</span></span>
           </div>
-        </div>
-      </section>
 
-      <section class="card">
-        <div class="hd">
-          <h2>Replies</h2>
-          <span class="pill" id="replyCount">0</span>
+          <div class="error" id="errBox" style="display:none"></div>
         </div>
-        <div class="bd">
-          <div class="replies" id="replyList"></div>
-          <div class="empty" id="replyEmpty" style="display:none;">
-            No replies yet. Please wait — support will update this ticket.
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
+      </div>
 
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal">
-      <div class="mh">
-        <h3>Enter Ticket Code</h3>
-        <button class="btn secondary" id="btnCloseModal">Close</button>
-      </div>
-      <div class="mb">
-        <label for="inpCode">Ticket Code</label>
-        <input id="inpCode" placeholder="e.g. 564" inputmode="numeric" />
-      </div>
-      <div class="ma">
-        <button class="btn secondary" id="btnCancel">Cancel</button>
-        <button class="btn" id="btnSaveCode">Save</button>
+      <div class="card">
+        <div class="replyHeader">
+          <div class="cardTitle">Replies</div>
+          <div class="count"><span id="replyCount">0</span></div>
+        </div>
+        <div class="thread" id="threadEl">
+          <div style="color:var(--muted);font-weight:650">No replies yet. Please wait — support will update this ticket.</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    /***********************
-     * CONFIG (EDIT THIS)
-     ***********************/
-    const API_BASE = "https://script.google.com/macros/s/AKfycbzmuoo7x3aANn-d0UzxK2pqsPwufnW0tIDhkMftFjZ1wBLm-hkuDy0ouEvQvBJSsC1D8w/exec";
-    // Example:
-    // const API_BASE = "https://script.google.com/macros/s/AKfycbxxxxxx/exec";
+    /** ✅ IMPORTANT: put your deployed Apps Script WEB APP URL here */
+    const APP_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzZGpBHZfQOdhjz1oszH15LB61gSF0P6zM05BonFVg8efy8ibPOnnUkKd-KNT0cjG7IMg/exec"; 
+    const WORKSPACE_ID = "2a9e18d0-dae2-4d6d-8a66-f81ffa3f2d55";
+    const AUTO_REFRESH_MS = 20000;
 
-    /***********************
-     * HELPERS
-     ***********************/
-    const $ = (id) => document.getElementById(id);
+    const el = (id) => document.getElementById(id);
 
-    function fmtDate(s){
-      if (!s) return "—";
-      const d = new Date(s);
-      if (isNaN(d.getTime())) return String(s);
-      const pad = (n)=> String(n).padStart(2,"0");
-      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
-
-    function setStatusPill(status){
-      const el = $("pillStatus");
-      const st = (status || "—").toString();
-      el.textContent = st;
-
-      // reset classes
-      el.className = "pill status";
-
-      if (st === "OPEN") el.classList.add("warn");
-      else if (st === "IN_PROGRESS") el.classList.add("ok");
-      else if (st === "SOLVED" || st === "CLOSED") el.classList.add("ok");
-      else if (st === "REJECTED" || st === "CANCELLED") el.classList.add("bad");
-    }
-
-    function setAlert(msg){
-      const box = $("alertBox");
-      if (!msg){
-        box.style.display = "none";
-        box.textContent = "";
-      } else {
-        box.style.display = "block";
-        box.textContent = msg;
-      }
-    }
-
-    function getCodeFromUrl(){
+    function getCodeFromUrl() {
       const u = new URL(location.href);
       return (u.searchParams.get("code") || "").trim();
     }
-
-    function setCodeToUrl(code){
+    function setCodeInUrl(code) {
       const u = new URL(location.href);
-      if (code) u.searchParams.set("code", code);
-      else u.searchParams.delete("code");
+      u.searchParams.set("code", code);
       history.replaceState({}, "", u.toString());
     }
 
-    function renderReplies(thread){
-      const list = $("replyList");
-      list.innerHTML = "";
+    function fmtDate(v){
+      if(!v) return "—";
+      try{
+        // handles ISO strings
+        const d = new Date(v);
+        if(isNaN(d.getTime())) return String(v);
+        const dd = String(d.getDate()).padStart(2,"0");
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2,"0");
+        const mi = String(d.getMinutes()).padStart(2,"0");
+        const ss = String(d.getSeconds()).padStart(2,"0");
+        return `${dd}/${mm}/${yyyy}, ${hh}:${mi}:${ss}`;
+      }catch(e){
+        return String(v);
+      }
+    }
 
-      const arr = Array.isArray(thread) ? thread : [];
-      $("replyCount").textContent = String(arr.length);
-      $("replyEmpty").style.display = arr.length ? "none" : "block";
+    function setStatus(status){
+      const s = (status || "UNKNOWN").toUpperCase();
+      const pill = el("statusPill");
+      pill.className = "pill dot " + s;
+      pill.textContent = s;
+    }
 
-      for (const m of arr){
+    function showError(msg){
+      const b = el("errBox");
+      b.style.display = "block";
+      b.textContent = msg;
+    }
+    function clearError(){
+      const b = el("errBox");
+      b.style.display = "none";
+      b.textContent = "";
+    }
+
+    // JSONP call (no CORS needed)
+    function callApiJsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cbName = "__cb_" + Math.random().toString(36).slice(2);
+        window[cbName] = (data) => {
+          cleanup();
+          resolve(data);
+        };
+
+        const url = new URL(APP_SCRIPT_WEBAPP_URL);
+        Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+        url.searchParams.set("callback", cbName);
+
+        const script = document.createElement("script");
+        script.src = url.toString();
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Failed to load API (check Web App URL / deployment access)."));
+        };
+        document.body.appendChild(script);
+
+        function cleanup(){
+          try{ delete window[cbName]; }catch(e){ window[cbName] = undefined; }
+          if(script && script.parentNode) script.parentNode.removeChild(script);
+        }
+      });
+    }
+
+    function renderThread(thread){
+      const box = el("threadEl");
+      const items = Array.isArray(thread) ? thread : [];
+      el("replyCount").textContent = String(items.length || 0);
+
+      if(!items.length){
+        box.innerHTML = `<div style="color:var(--muted);font-weight:650">No replies yet. Please wait — support will update this ticket.</div>`;
+        return;
+      }
+
+      box.innerHTML = "";
+      items.forEach(m => {
+        const type = (m.type || "").toLowerCase();
+        const isPrivate = !!m.is_private;
+        const cls = ["msg"];
+        if(type.includes("system")) cls.push("system");
+        if(isPrivate) cls.push("private");
+
+        const who = (m.author_name || m.author_role || "Support");
+        const when = fmtDate(m.created_at);
+        const txt = (m.content || "").toString().trim();
+
+        const safeTxt = txt
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/\n/g,"<br>");
+
+        const badge = isPrivate ? " (Private note)" : "";
+
         const div = document.createElement("div");
-        div.className = "reply";
+        div.className = cls.join(" ");
         div.innerHTML = `
-          <div class="top">
-            <div class="from">${escapeHtml(m.from || "Support")}</div>
-            <div class="time">${escapeHtml(fmtDate(m.at))}</div>
+          <div class="topline">
+            <div><span class="who">${who}</span><span style="color:var(--muted)">${badge}</span></div>
+            <div>${when}</div>
           </div>
-          <div class="text">${escapeHtml(m.text || "")}</div>
+          <div class="txt">${safeTxt || "<span style='color:var(--muted)'>—</span>"}</div>
         `;
-        list.appendChild(div);
-      }
+        box.appendChild(div);
+      });
     }
 
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+    async function loadTicket(){
+      const code = getCodeFromUrl();
+      el("codeEl").textContent = code || "—";
+      el("lastChecked").textContent = fmtDate(new Date());
+      clearError();
 
-    async function fetchTicket(code){
-      // Apps Script should accept: ?code=564
-      const url = `${API_BASE}?code=${encodeURIComponent(code)}`;
-      const r = await fetch(url, { method: "GET" });
-      if (!r.ok) throw new Error(`API error: ${r.status}`);
-      return await r.json();
-    }
-
-    /***********************
-     * MAIN
-     ***********************/
-    let currentCode = getCodeFromUrl();
-    let timer = null;
-
-    async function refresh(){
-      const code = currentCode;
-      $("lastChecked").textContent = fmtDate(new Date().toISOString());
-      setAlert("");
-
-      if (!API_BASE || API_BASE.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")){
-        setAlert("Setup needed: Please paste your Apps Script Web App URL into API_BASE in index.html.");
+      if(!code){
+        showError("Missing code. Add ?code=### in URL or click Change code.");
+        setStatus("UNKNOWN");
+        renderThread([]);
         return;
       }
-
-      if (!code){
-        setAlert("No ticket code. Click “Change code” and enter your ticket number.");
-        return;
-      }
-
-      $("vCode").textContent = code;
 
       try{
-        const data = await fetchTicket(code);
+        const data = await callApiJsonp({
+          code,
+          workspace_id: WORKSPACE_ID,
+          limit: 50,
+          order: "asc"
+        });
 
-        if (!data || data.success !== true || !data.ticket){
-          setAlert("Ticket not found");
-          setStatusPill("—");
-          $("vSubject").textContent = "—";
-          $("vPriority").textContent = "—";
-          $("vCreated").textContent = "—";
-          $("vUpdated").textContent = "—";
-          $("vClosed").textContent = "—";
-          $("vDesc").textContent = "—";
-          renderReplies([]);
+        if(!data || data.success !== true){
+          setStatus("UNKNOWN");
+          renderThread([]);
+          showError((data && data.error) ? data.error : "Ticket not found / API error");
+          // keep blanks
+          el("subjEl").textContent = "—";
+          el("prioEl").textContent = "—";
+          el("crtEl").textContent = "—";
+          el("updEl").textContent = "—";
+          el("clsEl").textContent = "—";
+          el("descEl").textContent = "—";
           return;
         }
 
-        const t = data.ticket;
+        const t = data.ticket || {};
+        setStatus(t.status || "UNKNOWN");
 
-        setStatusPill(t.status);
-        $("vCode").textContent = t.code ?? code;
-        $("vSubject").textContent = t.subject || "—";
-        $("vPriority").textContent = t.priority || "—";
-        $("vCreated").textContent = fmtDate(t.created_at);
-        $("vUpdated").textContent = fmtDate(t.updated_at);
-        $("vClosed").textContent = t.closed_time ? fmtDate(t.closed_time) : "—";
-        $("vDesc").textContent = (t.description && String(t.description).trim()) ? t.description : "—";
+        el("codeEl").textContent = (t.code != null ? String(t.code) : code);
+        el("subjEl").textContent = t.subject || "—";
+        el("prioEl").textContent = t.priority || "—";
+        el("crtEl").textContent = fmtDate(t.created_at);
+        el("updEl").textContent = fmtDate(t.updated_at);
+        el("clsEl").textContent = fmtDate(t.closed_time);
+        el("descEl").textContent = (t.description && String(t.description).trim()) ? t.description : "—";
 
-        renderReplies(t.thread || []);
+        // Show replies / timeline
+        renderThread(data.thread || []);
 
-      } catch(err){
-        console.error(err);
-        setAlert("Error loading ticket. Please try again.");
+      }catch(err){
+        setStatus("UNKNOWN");
+        renderThread([]);
+        showError(err.message || String(err));
       }
     }
 
-    function startAutoRefresh(){
-      if (timer) clearInterval(timer);
-      timer = setInterval(refresh, 20000);
-    }
-
-    /***********************
-     * UI EVENTS
-     ***********************/
-    function openModal(){
-      $("modalBackdrop").style.display = "flex";
-      $("inpCode").value = currentCode || "";
-      setTimeout(()=> $("inpCode").focus(), 50);
-    }
-    function closeModal(){
-      $("modalBackdrop").style.display = "none";
-    }
-
-    $("btnChange").addEventListener("click", openModal);
-    $("btnCloseModal").addEventListener("click", closeModal);
-    $("btnCancel").addEventListener("click", closeModal);
-    $("modalBackdrop").addEventListener("click", (e)=>{
-      if (e.target === $("modalBackdrop")) closeModal();
+    el("refreshBtn").addEventListener("click", loadTicket);
+    el("changeBtn").addEventListener("click", () => {
+      const curr = getCodeFromUrl();
+      const next = prompt("Enter ticket code", curr || "");
+      if(next === null) return;
+      const clean = String(next).trim();
+      if(!clean) return;
+      setCodeInUrl(clean);
+      loadTicket();
     });
-
-    $("btnSaveCode").addEventListener("click", ()=>{
-      const v = ($("inpCode").value || "").trim();
-      if (!v){
-        currentCode = "";
-        setCodeToUrl("");
-        closeModal();
-        refresh();
-        return;
-      }
-      currentCode = v;
-      setCodeToUrl(v);
-      closeModal();
-      refresh();
-    });
-
-    $("btnRefresh").addEventListener("click", refresh);
 
     // Boot
-    (async function init(){
-      if (!currentCode) openModal();
-      await refresh();
-      startAutoRefresh();
+    (function init(){
+      // If no code in URL, ask once
+      if(!getCodeFromUrl()){
+        const c = prompt("Enter ticket code (example: 559)", "");
+        if(c && String(c).trim()){
+          setCodeInUrl(String(c).trim());
+        }
+      }
+      loadTicket();
+      setInterval(loadTicket, AUTO_REFRESH_MS);
     })();
   </script>
 </body>
