@@ -45,9 +45,7 @@
     <!-- Main Card -->
     <div class="mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
       <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="text-lg font-extrabold text-slate-900" data-i18n="ticketHeader">Ticket</div>
-        </div>
+        <div class="text-lg font-extrabold text-slate-900" data-i18n="ticketHeader">Ticket</div>
 
         <div class="flex items-center gap-2">
           <span id="statusPill" class="badge px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase text-slate-700">
@@ -133,10 +131,7 @@
     /***********************
      * CONFIG
      ***********************/
-    // Your Apps Script Web App URL (do NOT include ?code=)
-    // Example: https://script.googleusercontent.com/a/macros/casinomcw.com/echo?user_content_key=...
-    const API_BASE = "https://script.google.com/macros/s/AKfycbxZ2sndk__eO1h6CVdKqZ6kLi-mt8R8Nry5eJ2KtE59Iq5Glfpdy0JkwxxpszuYfi0Y/exec";
-
+    const API_BASE = "https://script.google.com/macros/s/AKfycbxZ2sndk__eO1h6CVdKqZ6kLi-mt8R8Nry5eJ2KtE59Iq5Glfpdy0JkwxxpszuYfi0Y/exec"; // <-- your Apps Script web app URL
     const AUTO_REFRESH_MS = 20000;
 
     /***********************
@@ -163,7 +158,6 @@
         promptCode: "আপনার টিকিট কোড লিখুন:",
         invalidCode: "অবৈধ কোড। দয়া করে আবার চেষ্টা করুন।",
         ticketNotFound: "টিকিট পাওয়া যায়নি",
-        loading: "লোড হচ্ছে…",
         affiliateSupport: "অ্যাফিলিয়েট সাপোর্ট"
       },
       en: {
@@ -186,19 +180,21 @@
         promptCode: "Enter your ticket code:",
         invalidCode: "Invalid code. Please try again.",
         ticketNotFound: "Ticket not found",
-        loading: "Loading…",
         affiliateSupport: "Affiliate Support"
       }
     };
 
     function getLang() {
       const saved = localStorage.getItem("tt_lang");
-      return saved === "en" ? "en" : "bn"; // default Bangla
+      return saved === "en" ? "en" : "bn";
     }
     function setLang(lang) {
       localStorage.setItem("tt_lang", lang);
       applyLang(lang);
       styleLangButtons(lang);
+      // also re-render empty label text instantly
+      const empty = document.getElementById("repliesEmpty");
+      if (!empty.classList.contains("hidden")) empty.textContent = I18N[lang].noReplies;
     }
     function applyLang(lang) {
       document.documentElement.lang = lang;
@@ -213,7 +209,6 @@
       const idleCls = "text-slate-700 hover:bg-slate-50";
       const btnBn = document.getElementById("btnBn");
       const btnEn = document.getElementById("btnEn");
-
       btnBn.className = "px-3 py-1.5 rounded-full text-sm font-semibold transition " + (lang === "bn" ? activeCls : idleCls);
       btnEn.className = "px-3 py-1.5 rounded-full text-sm font-semibold transition " + (lang === "en" ? activeCls : idleCls);
     }
@@ -225,42 +220,30 @@
       const u = new URL(location.href);
       return u.searchParams.get(name);
     }
-
     function setQueryParam(key, value) {
       const u = new URL(location.href);
       if (!value) u.searchParams.delete(key);
       else u.searchParams.set(key, value);
       history.replaceState(null, "", u.toString());
     }
-
     function formatDT(iso) {
       if (!iso) return "—";
       try {
         const d = new Date(iso);
         const pad = (n) => String(n).padStart(2, "0");
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-      } catch {
-        return "—";
-      }
+      } catch { return "—"; }
     }
-
-    // Remove HTML tags and decode common entities
     function cleanMessageText(input) {
       if (!input) return "";
       let s = String(input);
-
-      // decode common entities
       s = s.replaceAll("&nbsp;", " ")
            .replaceAll("&amp;", "&")
            .replaceAll("&lt;", "<")
            .replaceAll("&gt;", ">")
            .replaceAll("&quot;", '"')
            .replaceAll("&#39;", "'");
-
-      // strip tags
       s = s.replace(/<\/?[^>]+(>|$)/g, "");
-
-      // collapse whitespace
       s = s.replace(/\s+/g, " ").trim();
       return s;
     }
@@ -270,17 +253,19 @@
       const status = String(statusRaw || "UNKNOWN").toUpperCase();
       pill.textContent = `• ${status}`;
 
-      pill.classList.remove("text-slate-700","bg-white","border-slate-200","text-blue-700","bg-blue-50","border-blue-200","text-green-700","bg-green-50","border-green-200","text-amber-700","bg-amber-50","border-amber-200","text-red-700","bg-red-50","border-red-200");
+      pill.classList.remove(
+        "text-slate-700","bg-white","border-slate-200",
+        "text-blue-700","bg-blue-50","border-blue-200",
+        "text-green-700","bg-green-50","border-green-200",
+        "text-amber-700","bg-amber-50","border-amber-200",
+        "text-red-700","bg-red-50","border-red-200"
+      );
 
-      // Default style
       let cls = ["text-slate-700","bg-white","border-slate-200"];
-
       if (status.includes("IN_PROGRESS") || status.includes("IN-PROGRESS")) cls = ["text-blue-700","bg-blue-50","border-blue-200"];
       else if (status.includes("SOLVED") || status.includes("RESOLVED")) cls = ["text-green-700","bg-green-50","border-green-200"];
       else if (status.includes("OPEN")) cls = ["text-amber-700","bg-amber-50","border-amber-200"];
-      else if (status.includes("CLOSED")) cls = ["text-slate-700","bg-slate-50","border-slate-200"];
       else if (status.includes("ESCAL")) cls = ["text-red-700","bg-red-50","border-red-200"];
-
       pill.classList.add(...cls);
     }
 
@@ -291,18 +276,25 @@
       el.textContent = msg;
     }
 
-    function setLoadingSkeleton(on) {
-      const ids = ["subject","createdAt","priority","updatedAt","closedAt","description"];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (on) {
-          el.dataset.prev = el.textContent;
-          el.textContent = "";
-          el.classList.add("skeleton","rounded","min-h-[18px]");
-        } else {
-          el.classList.remove("skeleton","rounded","min-h-[18px]");
-        }
-      });
+    /***********************
+     * IMPORTANT FIX ✅
+     * Replies can be in many places depending on script response.
+     ***********************/
+    function extractReplies(payload) {
+      // Try all possible locations
+      const candidates = [
+        payload?.ticket?.thread,
+        payload?.ticket?.messages,
+        payload?.thread,
+        payload?.messages,
+        payload?.data?.thread,
+        payload?.data?.messages,
+        payload?.ticket?.data?.messages
+      ];
+      for (const c of candidates) {
+        if (Array.isArray(c) && c.length) return c;
+      }
+      return [];
     }
 
     /***********************
@@ -311,8 +303,7 @@
     async function apiFetchTicket(code) {
       const url = `${API_BASE}${API_BASE.includes("?") ? "&" : "?"}code=${encodeURIComponent(code)}&format=json`;
       const res = await fetch(url, { cache: "no-store" });
-      const data = await res.json();
-      return data;
+      return await res.json();
     }
 
     /***********************
@@ -322,7 +313,10 @@
       const lang = getLang();
       const t = I18N[lang];
 
-      if (!payload || payload.success !== true || !payload.ticket) {
+      // ticket object can be in payload.ticket OR payload.data.ticket
+      const tk = payload?.ticket || payload?.data?.ticket;
+
+      if (!payload || payload.success !== true || !tk) {
         setStatusPill("UNKNOWN");
         document.getElementById("ticketCode").textContent = currentCode || "—";
         document.getElementById("subject").textContent = "—";
@@ -331,10 +325,10 @@
         document.getElementById("updatedAt").textContent = "—";
         document.getElementById("closedAt").textContent = "—";
         document.getElementById("description").textContent = "—";
+        renderReplies([]);
         return;
       }
 
-      const tk = payload.ticket;
       document.getElementById("ticketCode").textContent = tk.code ?? "—";
       document.getElementById("subject").textContent = tk.subject || "—";
       document.getElementById("createdAt").textContent = formatDT(tk.created_at);
@@ -344,8 +338,14 @@
       document.getElementById("description").textContent = tk.description || "—";
       setStatusPill(tk.status);
 
-      // Replies
-      const thread = Array.isArray(tk.thread) ? tk.thread : [];
+      const replies = extractReplies(payload);
+      renderReplies(replies);
+    }
+
+    function renderReplies(thread) {
+      const lang = getLang();
+      const t = I18N[lang];
+
       document.getElementById("replyCount").textContent = String(thread.length);
 
       const empty = document.getElementById("repliesEmpty");
@@ -353,6 +353,7 @@
 
       if (!thread.length) {
         empty.classList.remove("hidden");
+        empty.textContent = t.noReplies;
         list.classList.add("hidden");
         list.innerHTML = "";
         return;
@@ -362,12 +363,9 @@
       list.classList.remove("hidden");
 
       list.innerHTML = thread.map(msg => {
-        const whoRaw = (msg.author || msg.created_by || msg.sender || msg.role || msg.user || "System");
-        // Replace "System" with Affiliate Support (as you requested)
-        const who = t.affiliateSupport;
-
         const when = formatDT(msg.created_at || msg.createdAt || msg.time || msg.timestamp);
         const body = cleanMessageText(msg.message || msg.content || msg.text || msg.body || "");
+        const who = t.affiliateSupport; // always show Affiliate Support (not System)
 
         return `
           <div class="flex justify-end">
@@ -394,26 +392,23 @@
       const lang = getLang();
       const t = I18N[lang];
 
-      if (!API_BASE || API_BASE.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")) {
+      if (!API_BASE || API_BASE.includes("https://script.google.com/macros/s/AKfycbxZ2sndk__eO1h6CVdKqZ6kLi-mt8R8Nry5eJ2KtE59Iq5Glfpdy0JkwxxpszuYfi0Y/exec")) {
         showError("API_BASE not set. Paste your Apps Script Web App URL inside index.html (API_BASE).");
         return;
       }
 
       showError("");
-      setLoadingSkeleton(true);
 
       try {
         const payload = await apiFetchTicket(currentCode);
         renderTicket(payload);
 
         if (payload && payload.success === false) {
-          const err = payload.error || t.ticketNotFound;
-          showError(err);
+          showError(payload.error || t.ticketNotFound);
         }
       } catch (e) {
         showError("Error loading ticket. Please try again.");
       } finally {
-        setLoadingSkeleton(false);
         document.getElementById("lastChecked").textContent = formatDT(new Date().toISOString());
       }
     }
@@ -438,8 +433,6 @@
 
     document.getElementById("btnRefresh").addEventListener("click", load);
     document.getElementById("btnChangeCode").addEventListener("click", promptChangeCode);
-
-    // Lang buttons
     document.getElementById("btnBn").addEventListener("click", () => setLang("bn"));
     document.getElementById("btnEn").addEventListener("click", () => setLang("en"));
 
@@ -451,7 +444,6 @@
 
       const code = (qs("code") || "").trim();
       if (!code || !/^\d+$/.test(code)) {
-        // Ask for code on first load if missing
         currentCode = "";
         promptChangeCode();
       } else {
@@ -460,7 +452,6 @@
         load();
       }
 
-      // Auto refresh
       setInterval(() => {
         if (currentCode) load();
       }, AUTO_REFRESH_MS);
