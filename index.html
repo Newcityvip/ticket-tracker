@@ -1,163 +1,141 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ticket Tracking</title>
   <style>
     :root{
-      --bg:#f6f7fb;
+      --bg:#f4f7ff;
       --card:#ffffff;
-      --text:#0f172a;
+      --text:#0b1220;
       --muted:#64748b;
-      --border:#e2e8f0;
-      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
-      --radius: 18px;
+      --border:#dbe3ff;
+      --shadow: 0 14px 45px rgba(2,8,23,.10);
+      --shadow2: 0 10px 30px rgba(2,8,23,.08);
+      --radius:18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(1200px 600px at 50% 0%, #eef2ff 0%, var(--bg) 60%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      background: radial-gradient(1200px 600px at 50% 0%, #e9efff 0%, var(--bg) 60%, #f7f9ff 100%);
       color:var(--text);
     }
-    .wrap{max-width:980px;margin:0 auto;padding:34px 18px 60px}
+    .wrap{max-width:1050px;margin:0 auto;padding:34px 18px 64px}
     .top{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
-      margin-bottom:18px;
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px
     }
     h1{margin:0;font-size:44px;letter-spacing:-.02em}
-    .sub{margin-top:6px;color:var(--muted);font-size:14px}
+    .sub{margin-top:6px;color:var(--muted)}
     .btn{
-      border:1px solid var(--border);
-      background:#0b1220;
-      color:#fff;
-      padding:12px 16px;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:600;
-      box-shadow: 0 12px 22px rgba(0,0,0,.08);
+      appearance:none;border:1px solid rgba(2,6,23,.10);
+      background:#0b1220;color:#fff;
+      padding:12px 18px;border-radius:14px;
+      font-weight:700;cursor:pointer;
+      box-shadow: var(--shadow2);
     }
-    .btn.secondary{
-      background:#fff;color:#0b1220;
-      box-shadow:none;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-      margin-top:18px;
-    }
+    .btn:active{transform:translateY(1px)}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
     .card{
       background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
+      border:1px solid rgba(2,6,23,.08);
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .cardHeader{
+    .cardHead{
       display:flex;align-items:center;justify-content:space-between;
-      padding:16px 18px;
-      border-bottom:1px solid var(--border);
-      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      padding:18px 20px;border-bottom:1px solid rgba(2,6,23,.07);
+      background: linear-gradient(180deg, rgba(233,239,255,.65) 0%, rgba(255,255,255,.0) 100%);
     }
-    .cardTitle{font-weight:800}
+    .cardHead h2{margin:0;font-size:18px}
     .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 12px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:.02em;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 11px;border-radius:999px;
+      border:1px solid rgba(2,6,23,.12);
+      font-weight:800;font-size:12px;
       background:#fff;
     }
-    .pill.dot::before{
-      content:"";
-      width:8px;height:8px;border-radius:999px;
-      background:#94a3b8;
-      display:inline-block;
-    }
-    .pill.OPEN.dot::before{background:#f59e0b}
-    .pill.IN_PROGRESS.dot::before{background:#3b82f6}
-    .pill.SOLVED.dot::before{background:#22c55e}
-    .pill.CLOSED.dot::before{background:#22c55e}
-    .pill.UNKNOWN.dot::before{background:#94a3b8}
+    .dot{width:8px;height:8px;border-radius:99px;background:#94a3b8}
+    .status-OPEN .dot{background:#f59e0b}
+    .status-IN_PROGRESS .dot{background:#3b82f6}
+    .status-SOLVED .dot{background:#22c55e}
+    .status-CLOSED .dot{background:#64748b}
+    .status-UNKNOWN .dot{background:#94a3b8}
 
-    .content{padding:18px}
-    .kv{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px 16px;
+    .row{display:flex;gap:10px;align-items:center}
+    .miniBtn{
+      appearance:none;background:#fff;border:1px solid rgba(2,6,23,.10);
+      padding:9px 12px;border-radius:12px;font-weight:800;cursor:pointer;
     }
-    .k{color:var(--muted);font-size:12px;margin-bottom:6px}
-    .v{font-weight:750}
+    .miniBtn:hover{background:#f8fafc}
+
+    .content{padding:18px 20px}
+    .kv{
+      display:grid;grid-template-columns: 180px 1fr 180px 1fr;
+      gap:14px 18px;
+      padding:4px 0 10px;
+    }
+    .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .v{font-weight:800}
     .desc{
-      margin-top:14px;
-      border:1px dashed var(--border);
-      border-radius:14px;
-      padding:14px;
-      color:#0f172a;
-      background:#fbfdff;
+      margin-top:10px;
+      border:1px dashed rgba(2,6,23,.18);
+      border-radius:14px;padding:12px 14px;
+      color:#111827;background:#fbfdff;
+      min-height:44px;
       white-space:pre-wrap;
     }
-    .meta{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:12px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+    .footerLine{
+      margin-top:12px;color:var(--muted);font-size:12px;
+      display:flex;gap:12px;flex-wrap:wrap;
     }
-    .error{
-      margin-top:12px;
-      background:#fff1f2;
-      border:1px solid #fecdd3;
-      color:#9f1239;
-      padding:12px 14px;
+    .alert{
+      margin-top:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.07);
+      color:#b91c1c;
       border-radius:14px;
-      font-weight:650;
+      padding:12px 14px;
+      font-weight:700;
+      white-space:pre-wrap;
     }
 
-    .replyHeader{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:16px 18px;
-      border-bottom:1px solid var(--border);
-    }
-    .count{font-size:12px;color:var(--muted);font-weight:700}
-    .thread{padding:14px 18px 18px; display:flex; flex-direction:column; gap:10px;}
-    .msg{
-      border:1px solid var(--border);
-      background:#fff;
+    /* Replies */
+    .replyWrap{padding:18px 20px}
+    .replyList{display:flex;flex-direction:column;gap:10px}
+    .bubble{
+      max-width:720px;
+      padding:12px 14px;
       border-radius:16px;
-      padding:12px 12px;
-      max-width: 760px;
+      border:1px solid rgba(2,6,23,.10);
+      background:#fff;
+      box-shadow: 0 6px 20px rgba(2,8,23,.06);
+      white-space:pre-wrap;
+      line-height:1.35;
     }
-    .msg .topline{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:10px;margin-bottom:6px;
-      font-size:12px;color:var(--muted);
+    .bubble .meta{
+      margin-top:8px;color:var(--muted);font-size:12px;font-weight:700;
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
     }
-    .msg .who{font-weight:800;color:#0f172a}
-    .msg .txt{white-space:pre-wrap; line-height:1.45}
-    .msg.system{
-      background:#f8fafc;
-      border-style:dashed;
+    .me{align-self:flex-end;background:#eef6ff;border-color:rgba(59,130,246,.20)}
+    .agent{align-self:flex-start;background:#f1fff5;border-color:rgba(34,197,94,.20)}
+    .sys{align-self:center;background:#f8fafc;border-style:dashed;max-width:860px}
+    .badge{
+      font-size:11px;font-weight:900;
+      padding:3px 8px;border-radius:999px;border:1px solid rgba(2,6,23,.10);
+      color:#0b1220;background:#fff;
     }
-    .msg.private{
-      background:#fff7ed;
-      border-color:#fed7aa;
+    .empty{
+      color:var(--muted);
+      font-weight:700;
+      padding:10px 0;
     }
 
-    .toolbar{
-      display:flex; gap:10px; align-items:center;
-    }
-
-    @media (max-width: 720px){
+    @media (max-width: 860px){
       h1{font-size:34px}
-      .kv{grid-template-columns:1fr}
-      .top{flex-direction:column}
-      .btn{width:100%}
+      .kv{grid-template-columns: 1fr 1fr}
     }
   </style>
 </head>
@@ -173,272 +151,194 @@
 
     <div class="grid">
       <div class="card">
-        <div class="cardHeader">
-          <div class="cardTitle">Ticket</div>
-          <div class="toolbar">
-            <span class="pill dot UNKNOWN" id="statusPill">UNKNOWN</span>
-            <button class="btn secondary" id="refreshBtn">Refresh</button>
+        <div class="cardHead">
+          <div class="row">
+            <h2>Ticket</h2>
+          </div>
+          <div class="row">
+            <span class="pill status-UNKNOWN" id="statusPill"><span class="dot"></span><span id="statusText">UNKNOWN</span></span>
+            <button class="miniBtn" id="refreshBtn">Refresh</button>
           </div>
         </div>
 
         <div class="content">
           <div class="kv">
-            <div>
-              <div class="k">Ticket Code</div>
-              <div class="v" id="codeEl">—</div>
-            </div>
-            <div>
-              <div class="k">Priority</div>
-              <div class="v" id="prioEl">—</div>
-            </div>
+            <div class="k">Ticket Code</div><div class="v" id="codeV">—</div>
+            <div class="k">Priority</div><div class="v" id="priorityV">—</div>
 
-            <div>
-              <div class="k">Subject</div>
-              <div class="v" id="subjEl">—</div>
-            </div>
-            <div>
-              <div class="k">Last Updated</div>
-              <div class="v" id="updEl">—</div>
-            </div>
+            <div class="k">Subject</div><div class="v" id="subjectV">—</div>
+            <div class="k">Last Updated</div><div class="v" id="updatedV">—</div>
 
-            <div>
-              <div class="k">Created</div>
-              <div class="v" id="crtEl">—</div>
-            </div>
-            <div>
-              <div class="k">Closed</div>
-              <div class="v" id="clsEl">—</div>
-            </div>
+            <div class="k">Created</div><div class="v" id="createdV">—</div>
+            <div class="k">Closed</div><div class="v" id="closedV">—</div>
           </div>
 
-          <div class="k" style="margin-top:14px">Description</div>
-          <div class="desc" id="descEl">—</div>
+          <div class="k">Description</div>
+          <div class="desc" id="descV">—</div>
 
-          <div class="meta">
+          <div class="footerLine">
             <span>Auto refresh: every <b>20s</b></span>
             <span>•</span>
-            <span>Last checked: <span id="lastChecked">—</span></span>
+            <span>Last checked: <b id="checkedV">—</b></span>
           </div>
 
-          <div class="error" id="errBox" style="display:none"></div>
+          <div class="alert" id="errBox" style="display:none"></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="replyHeader">
-          <div class="cardTitle">Replies</div>
-          <div class="count"><span id="replyCount">0</span></div>
+        <div class="cardHead">
+          <h2>Replies</h2>
+          <span class="pill"><span class="dot"></span><span id="replyCount">0</span></span>
         </div>
-        <div class="thread" id="threadEl">
-          <div style="color:var(--muted);font-weight:650">No replies yet. Please wait — support will update this ticket.</div>
+        <div class="replyWrap">
+          <div class="replyList" id="replyList"></div>
+          <div class="empty" id="emptyReplies">No replies yet. Please wait — support will update this ticket.</div>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    /** ✅ IMPORTANT: put your deployed Apps Script WEB APP URL here */
-    const APP_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwpZWLcVUEGDmcauYUS-051OhiagUOq9B3Ht88nTw51ePBBg1-LAhYYCJKfkRV5jesQzA/exec"; 
-    const WORKSPACE_ID = "2a9e18d0-dae2-4d6d-8a66-f81ffa3f2d55";
-    const AUTO_REFRESH_MS = 20000;
+<script>
+  // ✅ Paste your Apps Script Web App /exec URL here
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZ2sndk__eO1h6CVdKqZ6kLi-mt8R8Nry5eJ2KtE59Iq5Glfpdy0JkwxxpszuYfi0Y/exec";
 
-    const el = (id) => document.getElementById(id);
+  const qs = new URLSearchParams(location.search);
+  let ticketCode = (qs.get("code") || "").trim();
 
-    function getCodeFromUrl() {
-      const u = new URL(location.href);
-      return (u.searchParams.get("code") || "").trim();
+  const el = (id) => document.getElementById(id);
+
+  function fmtDate(val){
+    if(!val) return "—";
+    const d = new Date(val);
+    if(String(d) === "Invalid Date") return String(val);
+    return d.toLocaleString();
+  }
+
+  function setStatus(status){
+    const st = (status || "UNKNOWN").toUpperCase();
+    const pill = el("statusPill");
+    pill.className = "pill status-" + st;
+    el("statusText").textContent = st;
+  }
+
+  function showError(msg){
+    const box = el("errBox");
+    box.style.display = msg ? "block" : "none";
+    box.textContent = msg || "";
+  }
+
+  function renderTicket(t){
+    el("codeV").textContent = ticketCode || "—";
+    if(!t){
+      setStatus("UNKNOWN");
+      el("priorityV").textContent = "—";
+      el("subjectV").textContent = "—";
+      el("createdV").textContent = "—";
+      el("updatedV").textContent = "—";
+      el("closedV").textContent = "—";
+      el("descV").textContent = "—";
+      return;
     }
-    function setCodeInUrl(code) {
-      const u = new URL(location.href);
-      u.searchParams.set("code", code);
-      history.replaceState({}, "", u.toString());
-    }
+    setStatus(t.status || "UNKNOWN");
+    el("priorityV").textContent = t.priority || "—";
+    el("subjectV").textContent = t.subject || "—";
+    el("createdV").textContent = fmtDate(t.created_at);
+    el("updatedV").textContent = fmtDate(t.updated_at);
+    el("closedV").textContent = fmtDate(t.closed_time);
+    el("descV").textContent = t.description || "—";
+  }
 
-    function fmtDate(v){
-      if(!v) return "—";
-      try{
-        // handles ISO strings
-        const d = new Date(v);
-        if(isNaN(d.getTime())) return String(v);
-        const dd = String(d.getDate()).padStart(2,"0");
-        const mm = String(d.getMonth()+1).padStart(2,"0");
-        const yyyy = d.getFullYear();
-        const hh = String(d.getHours()).padStart(2,"0");
-        const mi = String(d.getMinutes()).padStart(2,"0");
-        const ss = String(d.getSeconds()).padStart(2,"0");
-        return `${dd}/${mm}/${yyyy}, ${hh}:${mi}:${ss}`;
-      }catch(e){
-        return String(v);
-      }
-    }
+  function msgTypeLabel(m){
+    const r = (m.role || "SYSTEM").toUpperCase();
+    if(r === "AGENT") return "Support";
+    if(r === "USER") return "You";
+    return "System";
+  }
 
-    function setStatus(status){
-      const s = (status || "UNKNOWN").toUpperCase();
-      const pill = el("statusPill");
-      pill.className = "pill dot " + s;
-      pill.textContent = s;
-    }
+  function renderReplies(thread){
+    const list = el("replyList");
+    list.innerHTML = "";
 
-    function showError(msg){
-      const b = el("errBox");
-      b.style.display = "block";
-      b.textContent = msg;
-    }
-    function clearError(){
-      const b = el("errBox");
-      b.style.display = "none";
-      b.textContent = "";
-    }
+    // Show only non-private messages to end user
+    const visible = (thread || []).filter(m => !m.is_private && (m.text || "").trim() !== "");
 
-    // JSONP call (no CORS needed)
-    function callApiJsonp(params) {
-      return new Promise((resolve, reject) => {
-        const cbName = "__cb_" + Math.random().toString(36).slice(2);
-        window[cbName] = (data) => {
-          cleanup();
-          resolve(data);
-        };
+    el("replyCount").textContent = String(visible.length || 0);
+    el("emptyReplies").style.display = visible.length ? "none" : "block";
 
-        const url = new URL(APP_SCRIPT_WEBAPP_URL);
-        Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
-        url.searchParams.set("callback", cbName);
+    visible.forEach(m => {
+      const role = (m.role || "SYSTEM").toUpperCase();
+      const div = document.createElement("div");
+      div.className = "bubble " + (role === "USER" ? "me" : role === "AGENT" ? "agent" : "sys");
 
-        const script = document.createElement("script");
-        script.src = url.toString();
-        script.onerror = () => {
-          cleanup();
-          reject(new Error("Failed to load API (check Web App URL / deployment access)."));
-        };
-        document.body.appendChild(script);
+      const text = document.createElement("div");
+      text.textContent = m.text;
 
-        function cleanup(){
-          try{ delete window[cbName]; }catch(e){ window[cbName] = undefined; }
-          if(script && script.parentNode) script.parentNode.removeChild(script);
-        }
-      });
-    }
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `<span class="badge">${msgTypeLabel(m)}</span><span>${fmtDate(m.created_at)}</span>`;
 
-    function renderThread(thread){
-      const box = el("threadEl");
-      const items = Array.isArray(thread) ? thread : [];
-      el("replyCount").textContent = String(items.length || 0);
-
-      if(!items.length){
-        box.innerHTML = `<div style="color:var(--muted);font-weight:650">No replies yet. Please wait — support will update this ticket.</div>`;
-        return;
-      }
-
-      box.innerHTML = "";
-      items.forEach(m => {
-        const type = (m.type || "").toLowerCase();
-        const isPrivate = !!m.is_private;
-        const cls = ["msg"];
-        if(type.includes("system")) cls.push("system");
-        if(isPrivate) cls.push("private");
-
-        const who = (m.author_name || m.author_role || "Support");
-        const when = fmtDate(m.created_at);
-        const txt = (m.content || "").toString().trim();
-
-        const safeTxt = txt
-          .replace(/</g,"&lt;")
-          .replace(/>/g,"&gt;")
-          .replace(/\n/g,"<br>");
-
-        const badge = isPrivate ? " (Private note)" : "";
-
-        const div = document.createElement("div");
-        div.className = cls.join(" ");
-        div.innerHTML = `
-          <div class="topline">
-            <div><span class="who">${who}</span><span style="color:var(--muted)">${badge}</span></div>
-            <div>${when}</div>
-          </div>
-          <div class="txt">${safeTxt || "<span style='color:var(--muted)'>—</span>"}</div>
-        `;
-        box.appendChild(div);
-      });
-    }
-
-    async function loadTicket(){
-      const code = getCodeFromUrl();
-      el("codeEl").textContent = code || "—";
-      el("lastChecked").textContent = fmtDate(new Date());
-      clearError();
-
-      if(!code){
-        showError("Missing code. Add ?code=### in URL or click Change code.");
-        setStatus("UNKNOWN");
-        renderThread([]);
-        return;
-      }
-
-      try{
-        const data = await callApiJsonp({
-          code,
-          workspace_id: WORKSPACE_ID,
-          limit: 50,
-          order: "asc"
-        });
-
-        if(!data || data.success !== true){
-          setStatus("UNKNOWN");
-          renderThread([]);
-          showError((data && data.error) ? data.error : "Ticket not found / API error");
-          // keep blanks
-          el("subjEl").textContent = "—";
-          el("prioEl").textContent = "—";
-          el("crtEl").textContent = "—";
-          el("updEl").textContent = "—";
-          el("clsEl").textContent = "—";
-          el("descEl").textContent = "—";
-          return;
-        }
-
-        const t = data.ticket || {};
-        setStatus(t.status || "UNKNOWN");
-
-        el("codeEl").textContent = (t.code != null ? String(t.code) : code);
-        el("subjEl").textContent = t.subject || "—";
-        el("prioEl").textContent = t.priority || "—";
-        el("crtEl").textContent = fmtDate(t.created_at);
-        el("updEl").textContent = fmtDate(t.updated_at);
-        el("clsEl").textContent = fmtDate(t.closed_time);
-        el("descEl").textContent = (t.description && String(t.description).trim()) ? t.description : "—";
-
-        // Show replies / timeline
-        renderThread(data.thread || []);
-
-      }catch(err){
-        setStatus("UNKNOWN");
-        renderThread([]);
-        showError(err.message || String(err));
-      }
-    }
-
-    el("refreshBtn").addEventListener("click", loadTicket);
-    el("changeBtn").addEventListener("click", () => {
-      const curr = getCodeFromUrl();
-      const next = prompt("Enter ticket code", curr || "");
-      if(next === null) return;
-      const clean = String(next).trim();
-      if(!clean) return;
-      setCodeInUrl(clean);
-      loadTicket();
+      div.appendChild(text);
+      div.appendChild(meta);
+      list.appendChild(div);
     });
+  }
 
-    // Boot
-    (function init(){
-      // If no code in URL, ask once
-      if(!getCodeFromUrl()){
-        const c = prompt("Enter ticket code (example: 559)", "");
-        if(c && String(c).trim()){
-          setCodeInUrl(String(c).trim());
-        }
+  async function load(){
+    if(!ticketCode){
+      const x = prompt("Enter your ticket code:");
+      if(!x) return;
+      ticketCode = String(x).trim();
+      const u = new URL(location.href);
+      u.searchParams.set("code", ticketCode);
+      location.href = u.toString();
+      return;
+    }
+
+    showError("");
+    el("checkedV").textContent = new Date().toLocaleString();
+
+    try{
+      const url = `${APPS_SCRIPT_URL}?code=${encodeURIComponent(ticketCode)}&t=${Date.now()}`;
+      const res = await fetch(url, { method:"GET" });
+      const json = await res.json();
+
+      if(!json.success){
+        renderTicket(null);
+        renderReplies([]);
+        showError(json.error || "Unknown error");
+        return;
       }
-      loadTicket();
-      setInterval(loadTicket, AUTO_REFRESH_MS);
-    })();
-  </script>
+
+      // If ticket not found
+      if(!json.ticket){
+        renderTicket(null);
+        renderReplies([]);
+        showError("Ticket not found");
+        return;
+      }
+
+      renderTicket(json.ticket);
+      renderReplies(json.thread || []);
+    }catch(err){
+      renderTicket(null);
+      renderReplies([]);
+      showError("Error loading ticket. Please try again.");
+      console.error(err);
+    }
+  }
+
+  el("refreshBtn").addEventListener("click", load);
+  el("changeBtn").addEventListener("click", () => {
+    const x = prompt("Enter new ticket code:");
+    if(!x) return;
+    const u = new URL(location.href);
+    u.searchParams.set("code", String(x).trim());
+    location.href = u.toString();
+  });
+
+  load();
+  setInterval(load, 20000);
+</script>
 </body>
 </html>
