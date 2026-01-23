@@ -1,280 +1,559 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ticket Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Ticket Tracking</title>
+
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --btn:#0f172a;
+      --btnText:#fff;
+      --pill:#eef2ff;
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 40px auto 80px;
+      padding: 0 16px;
+    }
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:22px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 40px;
+      letter-spacing:-.02em;
+    }
+    .title p{
+      margin:6px 0 0;
+      color: var(--muted);
+    }
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      border:0;
+      background: var(--btn);
+      color: var(--btnText);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn.secondary{
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .grid{
+      display:grid;
+      gap:16px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 880px){
+      .grid{
+        grid-template-columns: 1fr;
+      }
+    }
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(226,232,240,.8);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .card .hd h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:-.01em;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:700;
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .pill.status{ background: var(--pill); border-color: #c7d2fe; }
+    .pill.ok{ background:#ecfdf5; border-color:#a7f3d0; }
+    .pill.warn{ background:#fff7ed; border-color:#fed7aa; }
+    .pill.bad{ background:#fef2f2; border-color:#fecaca; }
+    .card .bd{
+      padding: 18px;
+    }
+    .meta{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 22px;
+      margin-top: 10px;
+    }
+    .meta .k{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .meta .v{
+      font-size: 14px;
+      font-weight: 650;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .desc{
+      margin-top: 14px;
+    }
+    .desc .k{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+    .desc .v{
+      font-size: 14px;
+      line-height: 1.45;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      padding: 12px;
+      border-radius: 12px;
+      white-space:pre-wrap;
+    }
+
+    .subline{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .dot{ opacity:.6; }
+
+    .alert{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color:#991b1b;
+      font-weight:600;
+      font-size: 13px;
+    }
+
+    /* Replies */
+    .replies{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .reply{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+    .reply .top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom: 8px;
+    }
+    .reply .from{
+      font-weight:800;
+      font-size: 13px;
+    }
+    .reply .time{
+      color: var(--muted);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .reply .text{
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .empty{
+      color: var(--muted);
+      font-size: 13px;
+      padding: 10px 2px;
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(2,6,23,.5);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(520px, 100%);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(226,232,240,.8);
+      overflow:hidden;
+    }
+    .modal .mh{
+      padding: 16px 16px 10px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+    }
+    .modal .mh h3{ margin:0; font-size: 16px; }
+    .modal .mb{ padding: 16px; }
+    .modal label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
+    .modal input{
+      width:100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      outline:none;
+      font-size: 15px;
+    }
+    .modal .ma{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      padding: 0 16px 16px;
+    }
+  </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen">
-  <div class="max-w-3xl mx-auto p-4 sm:p-8">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Ticket Tracking</h1>
-        <p class="text-slate-600 text-sm">Track status and support replies using your ticket code.</p>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Ticket Tracking</h1>
+        <p>Track status and support replies using your ticket code.</p>
       </div>
-      <button id="changeBtn"
-        class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
-        Change code
-      </button>
+      <div class="top-actions">
+        <button class="btn" id="btnChange">Change code</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="hd">
+          <h2>Ticket</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="pill status" id="pillStatus">—</span>
+            <button class="btn secondary" id="btnRefresh">Refresh</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="meta">
+            <div>
+              <div class="k">Ticket Code</div>
+              <div class="v" id="vCode">—</div>
+            </div>
+            <div>
+              <div class="k">Priority</div>
+              <div class="v" id="vPriority">—</div>
+            </div>
+
+            <div>
+              <div class="k">Subject</div>
+              <div class="v" id="vSubject">—</div>
+            </div>
+            <div>
+              <div class="k">Last Updated</div>
+              <div class="v" id="vUpdated">—</div>
+            </div>
+
+            <div>
+              <div class="k">Created</div>
+              <div class="v" id="vCreated">—</div>
+            </div>
+            <div>
+              <div class="k">Closed</div>
+              <div class="v" id="vClosed">—</div>
+            </div>
+          </div>
+
+          <div class="desc">
+            <div class="k">Description</div>
+            <div class="v" id="vDesc">—</div>
+          </div>
+
+          <div id="alertBox" class="alert" style="display:none;"></div>
+
+          <div class="subline">
+            <span>Auto refresh: every <b>20s</b></span>
+            <span class="dot">•</span>
+            <span>Last checked: <span id="lastChecked">—</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd">
+          <h2>Replies</h2>
+          <span class="pill" id="replyCount">0</span>
+        </div>
+        <div class="bd">
+          <div class="replies" id="replyList"></div>
+          <div class="empty" id="replyEmpty" style="display:none;">
+            No replies yet. Please wait — support will update this ticket.
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
 
-    <!-- Input Card -->
-    <div id="inputCard" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <label class="block text-sm font-semibold text-slate-700 mb-2">Enter Ticket Code</label>
-      <div class="flex gap-2">
-        <input id="codeInput"
-          class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900"
-          placeholder="e.g. 559" />
-        <button id="trackBtn"
-          class="px-5 py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
-          Track
-        </button>
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="mh">
+        <h3>Enter Ticket Code</h3>
+        <button class="btn secondary" id="btnCloseModal">Close</button>
       </div>
-      <p class="text-xs text-slate-500 mt-2">Tip: you can also open a direct link like <span class="font-mono">?code=559</span></p>
-    </div>
-
-    <!-- Result Card -->
-    <div id="resultWrap" class="hidden mt-6 space-y-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div class="text-sm text-slate-500">Ticket Code</div>
-            <div id="codeText" class="text-xl font-bold text-slate-900"></div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <span id="statusPill" class="px-3 py-1 rounded-full text-sm font-semibold border">-</span>
-            <button id="refreshBtn" class="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50">
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        <div class="grid sm:grid-cols-2 gap-4 mt-4">
-          <div>
-            <div class="text-sm text-slate-500">Subject</div>
-            <div id="subjectText" class="font-semibold text-slate-900">-</div>
-          </div>
-          <div>
-            <div class="text-sm text-slate-500">Priority</div>
-            <div id="priorityText" class="font-semibold text-slate-900">-</div>
-          </div>
-          <div>
-            <div class="text-sm text-slate-500">Created</div>
-            <div id="createdText" class="font-semibold text-slate-900">-</div>
-          </div>
-          <div>
-            <div class="text-sm text-slate-500">Last Updated</div>
-            <div id="updatedText" class="font-semibold text-slate-900">-</div>
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <div class="text-sm text-slate-500">Description</div>
-          <div id="descText" class="mt-1 text-slate-800 whitespace-pre-wrap"></div>
-        </div>
-
-        <div id="errBox" class="hidden mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm"></div>
-        <div class="mt-3 text-xs text-slate-500">
-          Auto refresh: every <span class="font-semibold">20s</span>
-          <span class="mx-2">•</span>
-          Last checked: <span id="checkedAt">-</span>
-        </div>
+      <div class="mb">
+        <label for="inpCode">Ticket Code</label>
+        <input id="inpCode" placeholder="e.g. 564" inputmode="numeric" />
       </div>
-
-      <!-- Replies -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-slate-900">Replies</h2>
-          <span id="replyCount" class="text-sm text-slate-500">0</span>
-        </div>
-
-        <div id="threadBox" class="mt-4 space-y-3"></div>
-
-        <div id="noThread" class="hidden mt-4 text-slate-500 text-sm">
-          No replies yet. Please wait — support will update this ticket.
-        </div>
+      <div class="ma">
+        <button class="btn secondary" id="btnCancel">Cancel</button>
+        <button class="btn" id="btnSaveCode">Save</button>
       </div>
     </div>
   </div>
 
-<script>
-  // ✅ PUT YOUR APPS SCRIPT WEB APP URL HERE
-  // Example: https://script.google.com/macros/s/AKfycbxxxxxx/exec
-  const API = "https://script.google.com/macros/s/AKfycbwZN_6P9QeDwcVOo7RBkdJSsfw-oxdZPnsZH296OtIFG4XwYEKnUyr5JbmokZk74lKUNg/exec";
-  const AUTO_REFRESH_MS = 20000;
+  <script>
+    /***********************
+     * CONFIG (EDIT THIS)
+     ***********************/
+    const API_BASE = "https://script.google.com/macros/s/AKfycbzmuoo7x3aANn-d0UzxK2pqsPwufnW0tIDhkMftFjZ1wBLm-hkuDy0ouEvQvBJSsC1D8w/exec";
+    // Example:
+    // const API_BASE = "https://script.google.com/macros/s/AKfycbxxxxxx/exec";
 
-  const els = {
-    inputCard: document.getElementById("inputCard"),
-    resultWrap: document.getElementById("resultWrap"),
-    codeInput: document.getElementById("codeInput"),
-    trackBtn: document.getElementById("trackBtn"),
-    changeBtn: document.getElementById("changeBtn"),
-    refreshBtn: document.getElementById("refreshBtn"),
-    codeText: document.getElementById("codeText"),
-    subjectText: document.getElementById("subjectText"),
-    priorityText: document.getElementById("priorityText"),
-    createdText: document.getElementById("createdText"),
-    updatedText: document.getElementById("updatedText"),
-    descText: document.getElementById("descText"),
-    statusPill: document.getElementById("statusPill"),
-    errBox: document.getElementById("errBox"),
-    checkedAt: document.getElementById("checkedAt"),
-    threadBox: document.getElementById("threadBox"),
-    noThread: document.getElementById("noThread"),
-    replyCount: document.getElementById("replyCount"),
-  };
+    /***********************
+     * HELPERS
+     ***********************/
+    const $ = (id) => document.getElementById(id);
 
-  function qp(name){ return new URLSearchParams(location.search).get(name); }
-
-  function goTrack(code){
-    const base = location.pathname; // works for GitHub Pages repo path
-    location.href = base + "?code=" + encodeURIComponent(code);
-  }
-
-  function fmtDate(iso){
-    if (!iso) return "-";
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
-  }
-
-  function setStatus(status){
-    const s = String(status || "-").toUpperCase();
-    els.statusPill.textContent = s;
-
-    els.statusPill.className = "px-3 py-1 rounded-full text-sm font-semibold border";
-
-    if (s === "OPEN") {
-      els.statusPill.classList.add("bg-amber-50","text-amber-800","border-amber-200");
-    } else if (s === "IN_PROGRESS") {
-      els.statusPill.classList.add("bg-sky-50","text-sky-800","border-sky-200");
-    } else if (s === "CLOSED" || s === "SOLVED" || s === "RESOLVED") {
-      els.statusPill.classList.add("bg-emerald-50","text-emerald-800","border-emerald-200");
-    } else {
-      els.statusPill.classList.add("bg-slate-50","text-slate-700","border-slate-200");
+    function fmtDate(s){
+      if (!s) return "—";
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return String(s);
+      const pad = (n)=> String(n).padStart(2,"0");
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
-  }
 
-  function showError(msg){
-    els.errBox.textContent = msg;
-    els.errBox.classList.remove("hidden");
-  }
-  function clearError(){
-    els.errBox.classList.add("hidden");
-    els.errBox.textContent = "";
-  }
+    function setStatusPill(status){
+      const el = $("pillStatus");
+      const st = (status || "—").toString();
+      el.textContent = st;
 
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+      // reset classes
+      el.className = "pill status";
 
-  function renderThread(items){
-    els.threadBox.innerHTML = "";
-    const list = Array.isArray(items) ? items : [];
-    els.replyCount.textContent = String(list.length);
-
-    if (!list.length) {
-      els.noThread.classList.remove("hidden");
-      return;
+      if (st === "OPEN") el.classList.add("warn");
+      else if (st === "IN_PROGRESS") el.classList.add("ok");
+      else if (st === "SOLVED" || st === "CLOSED") el.classList.add("ok");
+      else if (st === "REJECTED" || st === "CANCELLED") el.classList.add("bad");
     }
-    els.noThread.classList.add("hidden");
 
-    // show oldest -> newest
-    list.forEach(m => {
-      const role = (m.role || "").toLowerCase();
-      const badge =
-        role === "customer" ? "bg-slate-100 text-slate-700" :
-        role === "agent" ? "bg-indigo-50 text-indigo-800" :
-        role === "bot" ? "bg-purple-50 text-purple-800" :
-        "bg-emerald-50 text-emerald-800";
+    function setAlert(msg){
+      const box = $("alertBox");
+      if (!msg){
+        box.style.display = "none";
+        box.textContent = "";
+      } else {
+        box.style.display = "block";
+        box.textContent = msg;
+      }
+    }
 
-      const card = document.createElement("div");
-      card.className = "rounded-xl border border-slate-200 p-4";
+    function getCodeFromUrl(){
+      const u = new URL(location.href);
+      return (u.searchParams.get("code") || "").trim();
+    }
 
-      card.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${badge}">
-              ${(role || "support").toUpperCase()}
-            </span>
-            <span class="text-sm font-semibold text-slate-900">${escapeHtml(m.from || "Support")}</span>
+    function setCodeToUrl(code){
+      const u = new URL(location.href);
+      if (code) u.searchParams.set("code", code);
+      else u.searchParams.delete("code");
+      history.replaceState({}, "", u.toString());
+    }
+
+    function renderReplies(thread){
+      const list = $("replyList");
+      list.innerHTML = "";
+
+      const arr = Array.isArray(thread) ? thread : [];
+      $("replyCount").textContent = String(arr.length);
+      $("replyEmpty").style.display = arr.length ? "none" : "block";
+
+      for (const m of arr){
+        const div = document.createElement("div");
+        div.className = "reply";
+        div.innerHTML = `
+          <div class="top">
+            <div class="from">${escapeHtml(m.from || "Support")}</div>
+            <div class="time">${escapeHtml(fmtDate(m.at))}</div>
           </div>
-          <div class="text-xs text-slate-500">${escapeHtml(fmtDate(m.at))}</div>
-        </div>
-        <div class="text-slate-800 whitespace-pre-wrap">${escapeHtml(m.text || "")}</div>
-      `;
-      els.threadBox.appendChild(card);
-    });
-  }
-
-  async function load(){
-    const code = (qp("code") || "").trim();
-
-    if (!code) {
-      els.inputCard.classList.remove("hidden");
-      els.resultWrap.classList.add("hidden");
-      els.changeBtn.classList.add("hidden");
-      return;
+          <div class="text">${escapeHtml(m.text || "")}</div>
+        `;
+        list.appendChild(div);
+      }
     }
 
-    els.inputCard.classList.add("hidden");
-    els.resultWrap.classList.remove("hidden");
-    els.changeBtn.classList.remove("hidden");
-    els.codeText.textContent = code;
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-    clearError();
-    els.checkedAt.textContent = new Date().toLocaleTimeString();
+    async function fetchTicket(code){
+      // Apps Script should accept: ?code=564
+      const url = `${API_BASE}?code=${encodeURIComponent(code)}`;
+      const r = await fetch(url, { method: "GET" });
+      if (!r.ok) throw new Error(`API error: ${r.status}`);
+      return await r.json();
+    }
 
-    try{
-      const res = await fetch(API + "?code=" + encodeURIComponent(code));
-      const data = await res.json();
+    /***********************
+     * MAIN
+     ***********************/
+    let currentCode = getCodeFromUrl();
+    let timer = null;
 
-      if (!data.success){
-        showError(data.message || "Ticket not found");
+    async function refresh(){
+      const code = currentCode;
+      $("lastChecked").textContent = fmtDate(new Date().toISOString());
+      setAlert("");
+
+      if (!API_BASE || API_BASE.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")){
+        setAlert("Setup needed: Please paste your Apps Script Web App URL into API_BASE in index.html.");
         return;
       }
 
-      const t = data.ticket || {};
-      setStatus(t.status);
-      els.subjectText.textContent = t.subject || "-";
-      els.priorityText.textContent = t.priority || "-";
-      els.createdText.textContent = fmtDate(t.created_at);
-      els.updatedText.textContent = fmtDate(t.updated_at);
-      els.descText.textContent = t.description || "-";
+      if (!code){
+        setAlert("No ticket code. Click “Change code” and enter your ticket number.");
+        return;
+      }
 
-      renderThread(data.thread || []);
+      $("vCode").textContent = code;
 
-    } catch(e){
-      showError("Error loading ticket. Please try again.");
+      try{
+        const data = await fetchTicket(code);
+
+        if (!data || data.success !== true || !data.ticket){
+          setAlert("Ticket not found");
+          setStatusPill("—");
+          $("vSubject").textContent = "—";
+          $("vPriority").textContent = "—";
+          $("vCreated").textContent = "—";
+          $("vUpdated").textContent = "—";
+          $("vClosed").textContent = "—";
+          $("vDesc").textContent = "—";
+          renderReplies([]);
+          return;
+        }
+
+        const t = data.ticket;
+
+        setStatusPill(t.status);
+        $("vCode").textContent = t.code ?? code;
+        $("vSubject").textContent = t.subject || "—";
+        $("vPriority").textContent = t.priority || "—";
+        $("vCreated").textContent = fmtDate(t.created_at);
+        $("vUpdated").textContent = fmtDate(t.updated_at);
+        $("vClosed").textContent = t.closed_time ? fmtDate(t.closed_time) : "—";
+        $("vDesc").textContent = (t.description && String(t.description).trim()) ? t.description : "—";
+
+        renderReplies(t.thread || []);
+
+      } catch(err){
+        console.error(err);
+        setAlert("Error loading ticket. Please try again.");
+      }
     }
-  }
 
-  // Events
-  els.trackBtn.addEventListener("click", () => {
-    const c = els.codeInput.value.trim();
-    if (!c) return;
-    goTrack(c);
-  });
+    function startAutoRefresh(){
+      if (timer) clearInterval(timer);
+      timer = setInterval(refresh, 20000);
+    }
 
-  els.codeInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") els.trackBtn.click();
-  });
+    /***********************
+     * UI EVENTS
+     ***********************/
+    function openModal(){
+      $("modalBackdrop").style.display = "flex";
+      $("inpCode").value = currentCode || "";
+      setTimeout(()=> $("inpCode").focus(), 50);
+    }
+    function closeModal(){
+      $("modalBackdrop").style.display = "none";
+    }
 
-  els.changeBtn.addEventListener("click", () => {
-    location.href = location.pathname; // clears query
-  });
+    $("btnChange").addEventListener("click", openModal);
+    $("btnCloseModal").addEventListener("click", closeModal);
+    $("btnCancel").addEventListener("click", closeModal);
+    $("modalBackdrop").addEventListener("click", (e)=>{
+      if (e.target === $("modalBackdrop")) closeModal();
+    });
 
-  els.refreshBtn.addEventListener("click", () => load());
+    $("btnSaveCode").addEventListener("click", ()=>{
+      const v = ($("inpCode").value || "").trim();
+      if (!v){
+        currentCode = "";
+        setCodeToUrl("");
+        closeModal();
+        refresh();
+        return;
+      }
+      currentCode = v;
+      setCodeToUrl(v);
+      closeModal();
+      refresh();
+    });
 
-  // First load + auto refresh
-  load();
-  setInterval(() => load(), AUTO_REFRESH_MS);
-</script>
+    $("btnRefresh").addEventListener("click", refresh);
+
+    // Boot
+    (async function init(){
+      if (!currentCode) openModal();
+      await refresh();
+      startAutoRefresh();
+    })();
+  </script>
 </body>
 </html>
