@@ -101,8 +101,9 @@
   </div>
 
 <script>
-  // ✅ Put your Apps Script Web App URL here:
-  const API = "https://script.google.com/macros/s/AKfycbzhAgCkoZao-AfzfdsIyVD0fEvsxqamUveAin-LfKO6jsdzn4asR7vTa0cMc8qjXhweMQ/exec";
+  // ✅ PUT YOUR APPS SCRIPT WEB APP URL HERE
+  // Example: https://script.google.com/macros/s/AKfycbxxxxxx/exec
+  const API = "https://script.google.com/macros/s/AKfycbxWhBT34g1vLROV_9bx3P7XCvCa662twkmi3jizkRV7K-NXbL8RRz8D8avMgL_yH8ESBQ/exec";
   const AUTO_REFRESH_MS = 20000;
 
   const els = {
@@ -129,8 +130,8 @@
   function qp(name){ return new URLSearchParams(location.search).get(name); }
 
   function goTrack(code){
-    const path = location.pathname.endsWith("/") ? location.pathname : (location.pathname + "/").replace("//","/");
-    location.href = path + "?code=" + encodeURIComponent(code);
+    const base = location.pathname; // works for GitHub Pages repo path
+    location.href = base + "?code=" + encodeURIComponent(code);
   }
 
   function fmtDate(iso){
@@ -142,14 +143,13 @@
     const s = String(status || "-").toUpperCase();
     els.statusPill.textContent = s;
 
-    // reset
     els.statusPill.className = "px-3 py-1 rounded-full text-sm font-semibold border";
 
     if (s === "OPEN") {
       els.statusPill.classList.add("bg-amber-50","text-amber-800","border-amber-200");
     } else if (s === "IN_PROGRESS") {
       els.statusPill.classList.add("bg-sky-50","text-sky-800","border-sky-200");
-    } else if (s === "CLOSED" || s === "RESOLVED") {
+    } else if (s === "CLOSED" || s === "SOLVED" || s === "RESOLVED") {
       els.statusPill.classList.add("bg-emerald-50","text-emerald-800","border-emerald-200");
     } else {
       els.statusPill.classList.add("bg-slate-50","text-slate-700","border-slate-200");
@@ -165,10 +165,19 @@
     els.errBox.textContent = "";
   }
 
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
   function renderThread(items){
     els.threadBox.innerHTML = "";
     const list = Array.isArray(items) ? items : [];
-    els.replyCount.textContent = `${list.length}`;
+    els.replyCount.textContent = String(list.length);
 
     if (!list.length) {
       els.noThread.classList.remove("hidden");
@@ -176,8 +185,8 @@
     }
     els.noThread.classList.add("hidden");
 
-    // newest last
-    list.slice().reverse().forEach(m => {
+    // show oldest -> newest
+    list.forEach(m => {
       const role = (m.role || "").toLowerCase();
       const badge =
         role === "customer" ? "bg-slate-100 text-slate-700" :
@@ -202,15 +211,6 @@
       `;
       els.threadBox.appendChild(card);
     });
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
   }
 
   async function load(){
