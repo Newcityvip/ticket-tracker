@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Track Your Ticket</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: Arial; background:#f6f7fb; padding:20px }
+    .card { background:#fff; padding:20px; border-radius:10px; max-width:500px; margin:auto }
+    .status { font-weight:bold; padding:6px 12px; border-radius:6px; display:inline-block }
+    .OPEN { background:#ffe08a }
+    .IN_PROGRESS { background:#7dd3fc }
+    .CLOSED { background:#86efac }
+    .err { color:#b91c1c; font-weight:700 }
+    input { padding:10px; width:100%; border-radius:8px; border:1px solid #ddd; margin:10px 0 }
+    button { padding:10px 14px; border:0; border-radius:8px; cursor:pointer }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Ticket Tracking</h2>
+
+  <div id="formBox">
+    <label>Ticket Code</label>
+    <input id="codeInput" placeholder="e.g. 559" />
+    <button onclick="go()">Track</button>
+  </div>
+
+  <div id="resultBox" style="display:none">
+    <p><b>Code:</b> <span id="code"></span></p>
+    <p><b>Status:</b> <span id="status" class="status"></span></p>
+    <p><b>Subject:</b> <span id="subject"></span></p>
+    <p><b>Last Updated:</b> <span id="updated"></span></p>
+    <p id="err" class="err"></p>
+  </div>
+</div>
+
+<script>
+  // ✅ PUT YOUR APPS SCRIPT WEB APP URL HERE
+  const API = "https://script.google.com/macros/s/AKfycbxv-R_AQgWw5Rp9XUWGASxwVo0rqJ6zhPOKvX2_7tc7DPQKmxJopnxUOKB21dP1eyRA/exec";
+
+  function getParam(name){
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function go(){
+    const c = document.getElementById("codeInput").value.trim();
+    if(!c) return;
+    location.href = location.pathname + "?code=" + encodeURIComponent(c);
+  }
+
+  async function load(){
+    const code = getParam("code");
+    if(!code) return;
+
+    document.getElementById("formBox").style.display = "none";
+    document.getElementById("resultBox").style.display = "block";
+    document.getElementById("code").innerText = code;
+
+    try{
+      const r = await fetch(API + "?code=" + encodeURIComponent(code));
+      const d = await r.json();
+
+      if(!d.success){
+        document.getElementById("err").innerText = d.message || "Ticket not found";
+        return;
+      }
+
+      document.getElementById("status").innerText = d.ticket.status;
+      document.getElementById("status").className = "status " + d.ticket.status;
+      document.getElementById("subject").innerText = d.ticket.subject || "-";
+      document.getElementById("updated").innerText =
+        d.ticket.updated_at ? new Date(d.ticket.updated_at).toLocaleString() : "-";
+
+      // Auto refresh every 20s
+      setTimeout(() => location.reload(), 20000);
+
+    }catch(e){
+      document.getElementById("err").innerText = "Error loading ticket. Try again.";
+    }
+  }
+
+  load();
+</script>
+
+</body>
+</html>
