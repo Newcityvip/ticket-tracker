@@ -58,100 +58,134 @@
           <button id="btnEn" class="px-3 py-1.5 rounded-full text-sm font-semibold">English</button>
         </div>
 
+        <!-- Button label changed via i18n -->
         <button id="btnChangeCode"
           class="rounded-full bg-slate-900 text-white px-5 py-3 font-semibold shadow hover:bg-slate-800 transition"
           data-i18n="changeCode">
-          Change code
+          Ticket Code
         </button>
       </div>
     </div>
 
-    <!-- Main Card -->
-    <div class="mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
-      <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-        <div class="text-lg font-extrabold text-slate-900" data-i18n="ticketHeader">Ticket</div>
-
-        <div class="flex items-center gap-2">
-          <span id="statusPill" class="badge px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase text-slate-700">
-            • UNKNOWN
-          </span>
-          <button id="btnRefresh" class="rounded-full badge px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition" data-i18n="refresh" disabled>
-            Refresh
-          </button>
-        </div>
+    <!-- GATE (shows only before code is submitted) -->
+    <div id="gateWrap" class="mt-10 card bg-white rounded-2xl overflow-hidden border border-slate-200">
+      <div class="px-6 py-5 border-b border-slate-200">
+        <div class="text-lg font-extrabold text-slate-900" data-i18n="gateTitle">Enter Ticket Code</div>
+        <div class="text-slate-600 mt-1" data-i18n="gateSubtitle">Please enter your ticket code to view the dashboard.</div>
       </div>
 
       <div class="px-6 py-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="space-y-5">
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="ticketCodeLbl">Ticket Code</div>
-              <div class="text-xl font-extrabold text-slate-900 mono" id="ticketCode">—</div>
-            </div>
+        <div class="max-w-md">
+          <label class="text-xs tracking-wider uppercase text-slate-500" data-i18n="gateInputLbl">Ticket Code</label>
+          <input id="gateInput"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="625"
+            class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 font-semibold mono focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+          <div id="gateError" class="hidden mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
 
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="subjectLbl">Subject</div>
-              <div class="text-base font-semibold text-slate-900" id="subject">—</div>
-            </div>
+          <div class="mt-4 flex items-center gap-2">
+            <button id="btnGateSubmit"
+              class="rounded-xl bg-slate-900 text-white px-5 py-3 font-semibold shadow hover:bg-slate-800 transition"
+              data-i18n="gateSubmit">
+              View Ticket
+            </button>
 
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="createdLbl">Created</div>
-              <div class="text-base font-semibold text-slate-900 mono" id="createdAt">—</div>
-            </div>
+            <button id="btnGateClear"
+              class="rounded-xl badge px-5 py-3 font-semibold hover:bg-slate-50 transition"
+              data-i18n="gateClear">
+              Clear
+            </button>
           </div>
-
-          <div class="space-y-5">
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="priorityLbl">Priority</div>
-              <div class="text-base font-semibold text-slate-900 mono" id="priority">—</div>
-            </div>
-
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="updatedLbl">Last Updated</div>
-              <div class="text-base font-semibold text-slate-900 mono" id="updatedAt">—</div>
-            </div>
-
-            <div>
-              <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="closedLbl">Closed</div>
-              <div class="text-base font-semibold text-slate-900 mono" id="closedAt">—</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="descLbl">Description</div>
-          <div class="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900" id="description">—</div>
-        </div>
-
-        <div class="mt-4 text-xs text-slate-500">
-          <span data-i18n="autoRefresh">Auto refresh: every 20s</span>
-          <span class="mx-2">•</span>
-          <span data-i18n="lastChecked">Last checked:</span>
-          <span id="lastChecked" class="mono">—</span>
-        </div>
-
-        <div id="ticketError" class="hidden mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
-
-        <!-- NEW: gate message (only shows before code submit) -->
-        <div id="gateMsg" class="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800 font-semibold">
-          <span data-i18n="gateMsg">Please enter your ticket code to view ticket details.</span>
         </div>
       </div>
     </div>
 
-    <!-- Replies -->
-    <div class="mt-6 card bg-white rounded-2xl overflow-hidden border border-slate-200">
-      <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-        <div class="text-lg font-extrabold text-slate-900" data-i18n="repliesHeader">Replies</div>
-        <span id="replyCount" class="badge px-3 py-1.5 rounded-full text-xs font-bold text-slate-700">0</span>
-      </div>
+    <!-- DASHBOARD (hidden until code submitted) -->
+    <div id="dashWrap" class="hidden">
+      <!-- Main Card -->
+      <div class="mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
+        <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+          <div class="text-lg font-extrabold text-slate-900" data-i18n="ticketHeader">Ticket</div>
 
-      <div class="px-6 py-6">
-        <div id="repliesEmpty" class="text-slate-600" data-i18n="noReplies">
-          No replies yet. Please wait — support will update this ticket.
+          <div class="flex items-center gap-2">
+            <span id="statusPill" class="badge px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase text-slate-700">
+              • UNKNOWN
+            </span>
+            <button id="btnRefresh" class="rounded-full badge px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition" data-i18n="refresh">
+              Refresh
+            </button>
+          </div>
         </div>
 
-        <div id="repliesList" class="hidden space-y-4"></div>
+        <div class="px-6 py-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-5">
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="ticketCodeLbl">Ticket Code</div>
+                <div class="text-xl font-extrabold text-slate-900 mono" id="ticketCode">—</div>
+              </div>
+
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="subjectLbl">Subject</div>
+                <div class="text-base font-semibold text-slate-900" id="subject">—</div>
+              </div>
+
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="createdLbl">Created</div>
+                <div class="text-base font-semibold text-slate-900 mono" id="createdAt">—</div>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="priorityLbl">Priority</div>
+                <div class="text-base font-semibold text-slate-900 mono" id="priority">—</div>
+              </div>
+
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="updatedLbl">Last Updated</div>
+                <div class="text-base font-semibold text-slate-900 mono" id="updatedAt">—</div>
+              </div>
+
+              <div>
+                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="closedLbl">Closed</div>
+                <div class="text-base font-semibold text-slate-900 mono" id="closedAt">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="descLbl">Description</div>
+            <div class="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900" id="description">—</div>
+          </div>
+
+          <div class="mt-4 text-xs text-slate-500">
+            <span data-i18n="autoRefresh">Auto refresh: every 20s</span>
+            <span class="mx-2">•</span>
+            <span data-i18n="lastChecked">Last checked:</span>
+            <span id="lastChecked" class="mono">—</span>
+          </div>
+
+          <div id="ticketError" class="hidden mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
+        </div>
+      </div>
+
+      <!-- Replies -->
+      <div class="mt-6 card bg-white rounded-2xl overflow-hidden border border-slate-200">
+        <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+          <div class="text-lg font-extrabold text-slate-900" data-i18n="repliesHeader">Replies</div>
+          <span id="replyCount" class="badge px-3 py-1.5 rounded-full text-xs font-bold text-slate-700">0</span>
+        </div>
+
+        <div class="px-6 py-6">
+          <div id="repliesEmpty" class="text-slate-600" data-i18n="noReplies">
+            No replies yet. Please wait — support will update this ticket.
+          </div>
+
+          <div id="repliesList" class="hidden space-y-4"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -170,7 +204,7 @@
       bn: {
         title: "টিকিট ট্র্যাকিং",
         subtitle: "আপনার টিকিট কোড দিয়ে স্ট্যাটাস ও সাপোর্ট রিপ্লাই দেখুন।",
-        changeCode: "কোড পরিবর্তন",
+        changeCode: "টিকিট কোড",
         ticketHeader: "টিকিট",
         refresh: "রিফ্রেশ",
         ticketCodeLbl: "টিকিট কোড",
@@ -189,12 +223,16 @@
         ticketNotFound: "টিকিট পাওয়া যায়নি",
         affiliateSupport: "অ্যাফিলিয়েট সাপোর্ট",
         user: "আপনি",
-        gateMsg: "টিকিট দেখার জন্য প্রথমে আপনার টিকিট কোড দিন।"
+        gateTitle: "টিকিট কোড দিন",
+        gateSubtitle: "ড্যাশবোর্ড দেখতে আপনার টিকিট কোড লিখুন।",
+        gateInputLbl: "টিকিট কোড",
+        gateSubmit: "টিকিট দেখুন",
+        gateClear: "মুছুন"
       },
       en: {
         title: "Ticket Tracking",
         subtitle: "Track status and support replies using your ticket code.",
-        changeCode: "Change code",
+        changeCode: "Ticket Code",
         ticketHeader: "Ticket",
         refresh: "Refresh",
         ticketCodeLbl: "Ticket Code",
@@ -213,7 +251,11 @@
         ticketNotFound: "Ticket not found",
         affiliateSupport: "Affiliate Support",
         user: "You",
-        gateMsg: "Please enter your ticket code first to view the ticket."
+        gateTitle: "Enter Ticket Code",
+        gateSubtitle: "Please enter your ticket code to view the dashboard.",
+        gateInputLbl: "Ticket Code",
+        gateSubmit: "View Ticket",
+        gateClear: "Clear"
       }
     };
 
@@ -289,12 +331,9 @@
       if (!s) return s;
       const a = Math.max(0, keepStart|0);
       const b = Math.max(0, keepEnd|0);
-      if (s.length <= a + b) {
-        return s[0] + "*".repeat(Math.max(1, s.length - 1));
-      }
+      if (s.length <= a + b) return s[0] + "*".repeat(Math.max(1, s.length - 1));
       return s.slice(0, a) + "*".repeat(Math.max(1, s.length - (a + b))) + s.slice(s.length - b);
     }
-
     function maskEmail(email) {
       const e = String(email || "").trim();
       const m = e.match(/^([^@\s]+)@([^@\s]+)$/);
@@ -305,33 +344,28 @@
       const maskedLocal = local[0] + "*".repeat(Math.max(3, local.length - 2)) + local[local.length - 1];
       return maskedLocal + "@" + domain;
     }
-
     function maskPhone(phone) {
       const p = String(phone || "");
       const digits = p.replace(/\D/g, "");
       if (digits.length < 8) return p;
       return maskMiddle(digits, 2, 2);
     }
-
     function maskUsername(u) {
       const s = String(u || "").trim();
       if (!s) return s;
       if (s.length <= 2) return maskMiddle(s, 1, 0);
       return maskMiddle(s, 1, 1);
     }
-
     function maskRef(ref) {
       const s = String(ref || "").trim();
       if (!s) return s;
       if (s.length < 6) return maskMiddle(s, 1, 1);
       return maskMiddle(s, 2, 2);
     }
-
     function stripSlipParts(desc) {
       let s = String(desc || "");
       if (/data:image\/|base64,/i.test(s)) return "";
       s = s.replace(/https?:\/\/\S+/gi, "");
-
       const badWords = ["slip","screenshot","screen shot","ss","attachment","attached","image","photo","png","jpg","jpeg","pdf"];
       const parts = s.split(/\s*\|\s*|\n+/).map(x => x.trim()).filter(Boolean);
       const filtered = parts.filter(part => {
@@ -340,28 +374,22 @@
         if (/\b\w+\.(png|jpg|jpeg|pdf)\b/i.test(part)) return false;
         return true;
       });
-
       return filtered.join(" | ").trim();
     }
-
     function maskSensitiveInDescription(descRaw) {
       let s = cleanMessageText(descRaw);
       s = stripSlipParts(s);
       if (!s) return "";
-
       s = s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig, (m) => maskEmail(m));
-
       s = s.replace(/\b(?:\+?\d[\d\s\-().]{6,}\d)\b/g, (m) => {
         const digits = m.replace(/\D/g, "");
         if (digits.length >= 8 && digits.length <= 16) return maskPhone(m);
         return m;
       });
-
       s = s.replace(/\b(username)\s*:\s*([A-Za-z0-9._-]{2,})\b/ig, (all, k, v) => `${k}: ${maskUsername(v)}`);
       s = s.replace(/\b(player\s*no|player\s*number|reference\s*no|reference|ref)\s*:\s*([A-Za-z0-9]{6,})\b/ig,
         (all, k, v) => `${k}: ${maskRef(v)}`
       );
-
       s = s.replace(/\b[A-Za-z0-9]{10,40}\b/g, (tok) => maskRef(tok));
       return s.trim();
     }
@@ -394,22 +422,27 @@
       el.textContent = msg;
     }
 
-    function setGate(isGated) {
-      const gate = document.getElementById("gateMsg");
-      const refresh = document.getElementById("btnRefresh");
-      if (isGated) {
+    function gateError(msg) {
+      const el = document.getElementById("gateError");
+      if (!msg) { el.classList.add("hidden"); el.textContent = ""; return; }
+      el.classList.remove("hidden");
+      el.textContent = msg;
+    }
+
+    function showGate(show) {
+      const gate = document.getElementById("gateWrap");
+      const dash = document.getElementById("dashWrap");
+      if (show) {
         gate.classList.remove("hidden");
-        refresh.disabled = true;
-        refresh.classList.add("opacity-50","cursor-not-allowed");
+        dash.classList.add("hidden");
       } else {
         gate.classList.add("hidden");
-        refresh.disabled = false;
-        refresh.classList.remove("opacity-50","cursor-not-allowed");
+        dash.classList.remove("hidden");
       }
     }
 
     /***********************
-     * Replies extraction (robust)
+     * Replies logic (filter out empty)
      ***********************/
     function extractReplies(payload) {
       const candidates = [
@@ -427,9 +460,6 @@
       return [];
     }
 
-    /***********************
-     * Determine message side (Support left, User right)
-     ***********************/
     function isSupportMessage(msg) {
       const role = String(
         msg?.sender_role ??
@@ -451,9 +481,6 @@
       return true;
     }
 
-    /***********************
-     * NEW: Keep only real text replies (drop blanks like "—")
-     ***********************/
     function getMessageBody(msg) {
       return cleanMessageText(msg?.message || msg?.content || msg?.text || msg?.body || "");
     }
@@ -466,7 +493,7 @@
     }
 
     /***********************
-     * API Calls (Apps Script)
+     * API
      ***********************/
     async function apiFetchTicket(code) {
       const url = `${API_BASE}${API_BASE.includes("?") ? "&" : "?"}code=${encodeURIComponent(code)}&format=json`;
@@ -478,6 +505,8 @@
      * Render
      ***********************/
     function renderTicket(payload) {
+      const lang = getLang();
+      const t = I18N[lang];
       const tk = payload?.ticket || payload?.data?.ticket;
 
       if (!payload || payload.success !== true || !tk) {
@@ -513,11 +542,7 @@
       const lang = getLang();
       const t = I18N[lang];
 
-      // ✅ Filter out empty/placeholder replies
-      const cleanedThread = (Array.isArray(thread) ? thread : []).filter(msg => {
-        const body = getMessageBody(msg);
-        return isRealText(body);
-      });
+      const cleanedThread = (Array.isArray(thread) ? thread : []).filter(msg => isRealText(getMessageBody(msg)));
 
       document.getElementById("replyCount").textContent = String(cleanedThread.length);
 
@@ -573,7 +598,7 @@
     }
 
     /***********************
-     * App State / Events
+     * App State
      ***********************/
     let currentCode = "";
 
@@ -581,12 +606,7 @@
       const lang = getLang();
       const t = I18N[lang];
 
-      if (!API_BASE || API_BASE.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")) {
-        showError("API_BASE not set. Paste your Apps Script Web App URL inside index.html (API_BASE).");
-        return;
-      }
-
-      // ✅ Do not load unless code submitted
+      if (!API_BASE) return;
       if (!currentCode) return;
 
       showError("");
@@ -605,9 +625,38 @@
       }
     }
 
+    function submitCodeFromGate(code) {
+      const lang = getLang();
+      const t = I18N[lang];
+
+      const cleaned = String(code || "").trim();
+      if (!cleaned || !/^\d+$/.test(cleaned)) {
+        gateError(t.invalidCode);
+        return;
+      }
+
+      gateError("");
+      currentCode = cleaned;
+      setQueryParam("code", cleaned);
+
+      // show dashboard only after submit
+      showGate(false);
+      document.getElementById("ticketCode").textContent = cleaned;
+
+      load();
+    }
+
     function promptChangeCode() {
       const lang = getLang();
       const t = I18N[lang];
+
+      // If already on dashboard, allow prompt change
+      // If on gate, focus input instead (cleaner UX)
+      const gateVisible = !document.getElementById("gateWrap").classList.contains("hidden");
+      if (gateVisible) {
+        document.getElementById("gateInput").focus();
+        return;
+      }
 
       const next = prompt(t.promptCode, currentCode || "");
       if (next === null) return;
@@ -620,7 +669,6 @@
 
       currentCode = cleaned;
       setQueryParam("code", cleaned);
-      setGate(false);
       load();
     }
 
@@ -629,6 +677,18 @@
     document.getElementById("btnBn").addEventListener("click", () => setLang("bn"));
     document.getElementById("btnEn").addEventListener("click", () => setLang("en"));
 
+    document.getElementById("btnGateSubmit").addEventListener("click", () => {
+      submitCodeFromGate(document.getElementById("gateInput").value);
+    });
+    document.getElementById("btnGateClear").addEventListener("click", () => {
+      document.getElementById("gateInput").value = "";
+      gateError("");
+      document.getElementById("gateInput").focus();
+    });
+    document.getElementById("gateInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitCodeFromGate(document.getElementById("gateInput").value);
+    });
+
     // Init
     (function init() {
       const lang = getLang();
@@ -636,19 +696,17 @@
       styleLangButtons(lang);
 
       const code = (qs("code") || "").trim();
-
-      // ✅ NEW behavior:
-      // - If URL has valid code, load.
-      // - If not, keep page gated (no auto prompt), user must click Change code.
       if (code && /^\d+$/.test(code)) {
         currentCode = code;
+        showGate(false);
         document.getElementById("ticketCode").textContent = code;
-        setGate(false);
         load();
       } else {
+        // ✅ IMPORTANT: Do NOT show dashboard at all before code submit
         currentCode = "";
-        setGate(true);
-        // keep everything as default — no auto prompt
+        showGate(true);
+        // focus input for quick entry
+        setTimeout(() => document.getElementById("gateInput").focus(), 50);
       }
 
       setInterval(() => {
