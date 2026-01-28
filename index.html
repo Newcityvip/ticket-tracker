@@ -259,6 +259,7 @@
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       } catch { return "—"; }
     }
+
     function cleanMessageText(input) {
       if (!input) return "";
       let s = String(input);
@@ -272,6 +273,121 @@
       s = s.replace(/<\/?[^>]+(>|$)/g, "");
       s = s.replace(/\s+/g, " ").trim();
       return s;
+    }
+
+    /***********************
+     * NEW: Masking + slip removal for DESCRIPTION only
+     * - keeps everything else unchanged
+     ***********************/
+    function maskMiddle(str, keepStart, keepEnd) {
+      const s = String(str || "");
+      if (!s) return s;
+      const a = Math.max(0, keepStart|0);
+      const b = Math.max(0, keepEnd|0);
+      if (s.length <= a + b) {
+        // too short: keep first char only
+        return s[0] + "*".repeat(Math.max(1, s.length - 1));
+      }
+      return s.slice(0, a) + "*".repeat(Math.max(1, s.length - (a + b))) + s.slice(s.length - b);
+    }
+
+    function maskEmail(email) {
+      const e = String(email || "").trim();
+      const m = e.match(/^([^@\s]+)@([^@\s]+)$/);
+      if (!m) return e;
+      const local = m[1];
+      const domain = m[2];
+      if (local.length <= 2) return maskMiddle(local, 1, 0) + "@" + domain;
+      // example: m***********9@gmail.com
+      const maskedLocal = local[0] + "*".repeat(Math.max(3, local.length - 2)) + local[local.length - 1];
+      return maskedLocal + "@" + domain;
+    }
+
+    function maskPhone(phone) {
+      // keep first 2 and last 2: 01********89
+      const p = String(phone || "");
+      const digits = p.replace(/\D/g, "");
+      if (digits.length < 8) return p; // too short, skip
+      const masked = maskMiddle(digits, 2, 2);
+      return masked;
+    }
+
+    function maskUsername(u) {
+      // example: 7card -> 7***d
+      const s = String(u || "").trim();
+      if (!s) return s;
+      if (s.length <= 2) return maskMiddle(s, 1, 0);
+      return maskMiddle(s, 1, 1);
+    }
+
+    function maskRef(ref) {
+      // example: YT*******8Y (keep first 2 last 2)
+      const s = String(ref || "").trim();
+      if (!s) return s;
+      if (s.length < 6) return maskMiddle(s, 1, 1);
+      return maskMiddle(s, 2, 2);
+    }
+
+    function stripSlipParts(desc) {
+      // remove lines or segments that look like attachments/screenshots/slips/urls/base64/images
+      let s = String(desc || "");
+
+      // hard remove obvious base64/data urls
+      if (/data:image\/|base64,/i.test(s)) return "";
+
+      // remove URLs
+      s = s.replace(/https?:\/\/\S+/gi, "");
+
+      // remove common attachment tokens
+      // if line contains these keywords -> remove the entire line/segment
+      const badWords = [
+        "slip", "screenshot", "screen shot", "ss", "attachment", "attached", "image", "photo", "png", "jpg", "jpeg", "pdf"
+      ];
+
+      // split by pipe or newlines (your descriptions are often " | " separated)
+      const parts = s.split(/\s*\|\s*|\n+/).map(x => x.trim()).filter(Boolean);
+      const filtered = parts.filter(part => {
+        const low = part.toLowerCase();
+        // if contains file extensions or the bad keywords, drop it
+        if (badWords.some(w => low.includes(w))) return false;
+        if (/\b\w+\.(png|jpg|jpeg|pdf)\b/i.test(part)) return false;
+        return true;
+      });
+
+      return filtered.join(" | ").trim();
+    }
+
+    function maskSensitiveInDescription(descRaw) {
+      // 1) clean html
+      let s = cleanMessageText(descRaw);
+
+      // 2) remove slip/screenshot/urls/etc
+      s = stripSlipParts(s);
+
+      if (!s) return "";
+
+      // 3) mask emails anywhere
+      s = s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig, (m) => maskEmail(m));
+
+      // 4) mask phone-like digit sequences (8-16 digits; keep 2+2)
+      s = s.replace(/\b(?:\+?\d[\d\s\-().]{6,}\d)\b/g, (m) => {
+        const digits = m.replace(/\D/g, "");
+        if (digits.length >= 8 && digits.length <= 16) return maskPhone(m);
+        return m;
+      });
+
+      // 5) mask labeled fields: Username / User / Email / Phone / Ref / Reference / Player No
+      // Username
+      s = s.replace(/\b(username)\s*:\s*([A-Za-z0-9._-]{2,})\b/ig, (all, k, v) => `${k}: ${maskUsername(v)}`);
+      // Player No / Reference / Ref
+      s = s.replace(/\b(player\s*no|player\s*number|reference\s*no|reference|ref)\s*:\s*([A-Za-z0-9]{6,})\b/ig,
+        (all, k, v) => `${k}: ${maskRef(v)}`
+      );
+
+      // 6) extra safety: mask any long alphanum tokens (like refs) 10-40 chars
+      s = s.replace(/\b[A-Za-z0-9]{10,40}\b/g, (tok) => maskRef(tok));
+
+      return s.trim();
     }
 
     function setStatusPill(statusRaw) {
@@ -326,10 +442,6 @@
      * We try best-effort using available fields.
      ***********************/
     function isSupportMessage(msg) {
-      // Some possible fields:
-      // msg.sender_role / msg.role / msg.user_role / msg.sender?.role
-      // msg.sender_type / msg.type
-      // If none exist: keep current behavior (treat as support).
       const role = String(
         msg?.sender_role ??
         msg?.role ??
@@ -344,11 +456,9 @@
       if (role.includes("agent") || role.includes("support") || role.includes("admin") || role.includes("staff") || role.includes("system")) return true;
       if (role.includes("user") || role.includes("customer") || role.includes("player")) return false;
 
-      // Another common indicator: msg.is_customer / msg.isCustomer
       if (msg?.is_customer === true || msg?.isCustomer === true) return false;
       if (msg?.is_agent === true || msg?.isAgent === true) return true;
 
-      // Fallback: treat as support (safe default in your use-case)
       return true;
     }
 
@@ -389,7 +499,11 @@
       document.getElementById("priority").textContent = tk.priority || "—";
       document.getElementById("updatedAt").textContent = formatDT(tk.updated_at);
       document.getElementById("closedAt").textContent = tk.closed_time ? formatDT(tk.closed_time) : "—";
-      document.getElementById("description").textContent = tk.description || "—";
+
+      // ✅ FIXED: Clean + Mask description (no <p>, and hides slip parts)
+      const descMasked = maskSensitiveInDescription(tk.description || tk.note || "");
+      document.getElementById("description").textContent = descMasked || "—";
+
       setStatusPill(tk.status);
 
       const replies = extractReplies(payload);
@@ -421,7 +535,6 @@
         const body = cleanMessageText(msg.message || msg.content || msg.text || msg.body || "");
         const support = isSupportMessage(msg);
 
-        // Left = Support
         if (support) {
           return `
             <div class="flex justify-start">
@@ -438,7 +551,6 @@
           `;
         }
 
-        // Right = User
         return `
           <div class="flex justify-end">
             <div class="max-w-xl w-full sm:w-auto">
