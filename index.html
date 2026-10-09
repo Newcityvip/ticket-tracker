@@ -562,7 +562,7 @@
 
       list.innerHTML = cleanedThread.map(msg => {
         const when = formatDT(msg.created_at || msg.createdAt || msg.time || msg.timestamp);
-        const body = maskSensitiveInDescription(getMessageBody(msg));
+        const body = getMessageBody(msg);
         const support = isSupportMessage(msg);
 
         if (support) {
