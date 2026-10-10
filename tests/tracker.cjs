@@ -18,15 +18,18 @@ for (const script of scripts) {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     let requests = 0;
-    const payload = code => ({ success: true, ticket: { code, status: 'SOLVED', priority: 'HIGH', subject: 'Deposit follow up', description: 'Issue: Deposit Follow Up\nUsername: exampleuser\nEmail: example@gmail.com', thread: [
-      { role: 'agent', message: '<p>আপনার অনুরোধ গ্রহণ করা হয়েছে।</p><p>ধন্যবাদ।<br>Reference No: DJ9702EAMP</p>' },
-      { role: 'customer', message: 'Phone No: +880 1712 345678\n\nRequest No Delete: 123456789' },
+    const payload = code => ({ success: true, ticket: { code, status: 'SOLVED', priority: 'HIGH', created_at: '2026-10-09T10:05:00Z', updated_at: '2026-10-10T02:15:00Z', subject: 'Deposit follow up', description: 'Issue: Deposit Follow Up\nUsername: exampleuser\nEmail: example@gmail.com', thread: [
+      { role: 'agent', created_at: '2026-10-10T02:15:00Z', message: '<p>আপনার অনুরোধ গ্রহণ করা হয়েছে।</p><p>ধন্যবাদ।<br>Reference No: DJ9702EAMP</p>' },
+      { role: 'customer', created_at: '2026-10-09T10:05:00Z', message: 'Phone No: +880 1712 345678\n\nRequest No Delete: 123456789' },
       { role: 'customer', message: '<img src="https://private.example/slip.png">' },
       { message: '' }, {}, { message: '--' }
     ] } });
     await page.route('https://tracker.test/**', route => {
-      const file = route.request().url().includes('privacy.js') ? 'privacy.js' : route.request().url().includes('styles.css') ? 'styles.css' : 'index.html';
-      return route.fulfill({ contentType: file.endsWith('.js') ? 'application/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html', body: fs.readFileSync(path.join(__dirname, '..', file)) });
+      const pathname = new URL(route.request().url()).pathname;
+      const file = pathname === '/' ? 'index.html' : pathname.slice(1);
+      const types = { '.js': 'application/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.png': 'image/png' };
+      const local = path.join(__dirname, '..', file);
+      return route.fulfill(fs.existsSync(local) ? { contentType: types[path.extname(file)], body: fs.readFileSync(local) } : { status: 404, body: 'Missing asset' });
     });
     await page.route('**/exec?**', async route => {
       requests++;
@@ -77,11 +80,45 @@ for (const script of scripts) {
     assert.equal(await page.textContent('#ticketCode'), '222');
     assert.match(page.url(), /code=222/);
     assert.ok(requests <= 3, 'overlapping same-ticket requests');
-    for (const width of [390, 1280]) {
-      await page.setViewportSize({ width, height: 1000 });
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'horizontal overflow');
-      await page.screenshot({ path: path.join(__dirname, `preview-${width}.png`), fullPage: true });
+    const icons = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"]').evaluateAll(nodes => nodes.map(n => ({ href: n.href, sizes: n.getAttribute('sizes') })));
+    assert.equal(icons.length, 5);
+    for (const icon of icons) {
+      const size = await page.evaluate(async href => {
+        const img = new Image(); img.src = href; await img.decode();
+        return [img.naturalWidth, img.naturalHeight];
+      }, icon.href);
+      if (icon.sizes) assert.equal(size.join('x'), icon.sizes);
     }
+    for (const lang of ['en', 'bn']) {
+      await page.click(lang === 'en' ? '#btnEn' : '#btnBn');
+      for (const width of [320, 360, 375, 390, 414, 430, 768, 1280]) {
+        await page.setViewportSize({ width, height: 1000 });
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${lang} ${width}: horizontal overflow`);
+        for (const id of ['btnBn', 'btnEn', 'btnChangeCode', 'btnRefresh']) {
+          const box = await page.locator('#' + id).boundingBox();
+          assert.ok(box.height >= 44 && box.x >= 0 && box.x + box.width <= width, `${id}: touch target/clipping`);
+        }
+        await page.screenshot({ path: path.join(__dirname, `preview-${lang}-${width}.png`), fullPage: true });
+      }
+    }
+    await page.click('#btnEn');
+    const beforeLayout = await page.locator('.ticket-card').boundingBox();
+    await page.evaluate(() => { document.getElementById('loadState').textContent = I18N[getLang()].loading; });
+    assert.deepEqual(await page.locator('.ticket-card').boundingBox(), beforeLayout, 'refresh indicator layout shift');
+    await page.evaluate(() => { document.getElementById('loadState').textContent = ''; });
+    await page.setViewportSize({ width: 320, height: 900 });
+    for (const status of ['OPEN', 'IN_PROGRESS', 'SOLVED', 'CLOSED']) {
+      await page.evaluate(status => setStatusPill(status), status);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), status + ' overflow');
+      assert.ok(await page.locator('#btnRefresh').isVisible());
+    }
+    await page.evaluate(() => {
+      document.getElementById('subject').textContent = 'দীর্ঘ বিষয় Long subject '.repeat(20) + 'x'.repeat(200);
+      renderReplies([{ role: 'agent', created_at: '2026-10-10T01:02:03Z', message: ('বাংলা reply\n\n' + 'x'.repeat(100) + '\n').repeat(20) }]);
+    });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'long-content overflow');
+    assert.equal(await page.locator('.message-text').evaluate(el => getComputedStyle(el).whiteSpace), 'pre-wrap');
+    await page.evaluate(() => renderTicket(lastPayload));
     const beforeRefresh = requests;
     await page.clock.runFor(20000);
     await page.waitForFunction(() => document.getElementById('dashWrap').getAttribute('aria-busy') === 'false');
@@ -93,6 +130,11 @@ for (const script of scripts) {
     await page.waitForFunction(() => document.getElementById('ticketError').textContent.includes('Unable'));
     await page.goto('https://tracker.test/');
     assert.equal(await page.locator('#dashWrap').isVisible(), false);
+    for (const lang of ['bn', 'en']) {
+      await page.click(lang === 'bn' ? '#btnBn' : '#btnEn');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), lang + ' entry overflow');
+      await page.screenshot({ path: path.join(__dirname, `preview-gate-${lang}.png`), fullPage: true });
+    }
     await page.fill('#gateInput', 'abc');
     await page.click('#btnGateSubmit');
     assert.equal(await page.locator('#gateError').isVisible(), true);

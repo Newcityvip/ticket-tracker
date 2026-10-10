@@ -2,97 +2,30 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#243469" />
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="./assets/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png" />
   <title>Ticket Tracking</title>
 
   <link rel="stylesheet" href="styles.css" />
 
-  <style>
-    :root { color-scheme: light; }
-    body { background: radial-gradient(1200px 600px at 50% 0%, rgba(99,102,241,.08), transparent), #f6f7fb; }
-    .card { box-shadow: 0 18px 60px rgba(15, 23, 42, .08); }
-    .mono { font-variant-numeric: tabular-nums; }
-    .badge { border:1px solid rgba(15,23,42,.12); }
-    .skeleton { background: linear-gradient(90deg, rgba(15,23,42,.06), rgba(15,23,42,.03), rgba(15,23,42,.06)); background-size: 200% 100%; animation: sk 1.2s infinite; }
-    @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-    /* Chat bubble subtle tails (optional) */
-    .bubble-left:before{
-      content:"";
-      position:absolute;
-      left:-6px; top:16px;
-      width:12px; height:12px;
-      background: inherit;
-      border-left: inherit;
-      border-bottom: inherit;
-      transform: rotate(45deg);
-      border-radius: 2px;
-    }
-    .bubble-right:before{
-      content:"";
-      position:absolute;
-      right:-6px; top:16px;
-      width:12px; height:12px;
-      background: inherit;
-      border-right: inherit;
-      border-top: inherit;
-      transform: rotate(45deg);
-      border-radius: 2px;
-    }
-
-    body { font-family: "Segoe UI", "Nirmala UI", system-ui, sans-serif; color: #17233c; background: radial-gradient(ellipse at 10% 0%, #e6edff 0, transparent 45%), #f4f6fa; line-height: 1.65; }
-    body > div { max-width: 1120px !important; }
-    h1 { font-size: clamp(1.8rem, 5vw, 2.65rem) !important; letter-spacing: -.04em; }
-    .card { box-shadow: 0 8px 32px #152b4d08; }
-    #gateWrap { max-width: 700px; margin: 3.5rem auto; border-radius: 24px; }
-    #gateWrap > div:first-child { background: #f8faff; padding: 2rem; }
-    #gateWrap > div:last-child { padding: 2rem; }
-    #gateWrap .max-w-md { max-width: none; }
-    #gateInput { font-size: 1.3rem; letter-spacing: .12em; background: #f8faff; }
-    #dashWrap > .card { border-radius: 22px; }
-    #dashWrap > .card > div:first-child { background: #fafbfe; }
-    #ticketCode { font-size: 1.8rem; letter-spacing: -.025em; color: #3349a5; }
-    #subject { font-size: 1.15rem; }
-    #description, #subject, .message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
-    #description { padding: 1.25rem; line-height: 1.85; background: #f8faff; }
-    .grid > *, #repliesList > div > div { min-width: 0; }
-    #repliesList > div > div { max-width: 85%; }
-    .bubble-left, .bubble-right { box-shadow: none; padding: 1.25rem; }
-    .bubble-left { background: #f1f4ff; border-color: #dce3fc; border-bottom-left-radius: 5px; }
-    .bubble-right { background: #f0f8f5; border-color: #d6e9df; border-bottom-right-radius: 5px; }
-    .bubble-left:before, .bubble-right:before { display: none; }
-    .message-text { line-height: 1.85; font-size: .95rem; }
-    #repliesList .mt-3 { flex-wrap: wrap; }
-    #repliesEmpty { padding: 2rem 1rem; text-align: center; border: 1px dashed #d4dce9; border-radius: 14px; background: #fafbfe; }
-    button { transition: background-color .15s, box-shadow .15s; }
-    button:focus-visible, input:focus-visible { outline: 3px solid #6479db; outline-offset: 3px; }
-    button:disabled { opacity: .55; cursor: wait; }
-    #statusPill { white-space: normal; text-align: center; }
-    [aria-busy="true"] #loadState { animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 50% { opacity: .55; } }
-    @media(min-width:768px) { .grid > div + div { border-left: 1px solid #e6eaf1; padding-left: 2rem; } }
-    @media(max-width:480px) {
-      body > div { padding: 1.5rem 1rem !important; }
-      #dashWrap .px-6, #gateWrap > div { padding-left: 1rem; padding-right: 1rem; }
-      #dashWrap > .card > div:first-child { flex-wrap: wrap; gap: .75rem; }
-      #repliesList > div > div { max-width: 96%; }
-      .bubble-left, .bubble-right { padding: 1rem; }
-      #btnChangeCode { padding: .65rem 1rem; }
-    }
-    @media(prefers-reduced-motion:reduce) { *, *:before { animation: none !important; transition: none !important; } }
-  </style>
 </head>
 
 <body class="min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 py-10">
+  <main class="portal max-w-5xl mx-auto px-4 py-10">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
+    <header class="portal-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="brand">
+        <img class="brand-icon" src="./assets/favicon.svg" width="40" height="40" alt="" />
         <h1 class="text-4xl font-extrabold tracking-tight text-slate-900" data-i18n="title">Ticket Tracking</h1>
         <p class="text-slate-600 mt-2" data-i18n="subtitle">Track status and support replies using your ticket code.</p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="header-actions flex items-center gap-2">
         <!-- Language Toggle -->
         <div class="inline-flex rounded-full bg-white badge p-1 card">
           <button id="btnBn" class="px-3 py-1.5 rounded-full text-sm font-semibold">বাংলা</button>
@@ -106,7 +39,7 @@
           Ticket Code
         </button>
       </div>
-    </div>
+    </header>
 
     <!-- GATE (shows only before code is submitted) -->
     <div id="gateWrap" class="mt-10 card bg-white rounded-2xl overflow-hidden border border-slate-200">
@@ -147,9 +80,9 @@
     <div id="dashWrap" class="hidden" aria-busy="false">
       <div id="loadState" role="status" class="mt-6 text-sm text-slate-600"></div>
       <!-- Main Card -->
-      <div class="mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
+      <div class="ticket-card mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
         <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-          <div class="text-lg font-extrabold text-slate-900" data-i18n="ticketHeader">Ticket</div>
+          <div class="ticket-heading"><div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="ticketCodeLbl">Ticket Code</div><div class="text-xl font-extrabold text-slate-900 mono" id="ticketCode">—</div></div>
 
           <div class="flex items-center gap-2">
             <span id="statusPill" class="badge px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase text-slate-700">
@@ -162,13 +95,8 @@
         </div>
 
         <div class="px-6 py-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="ticket-details grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-5">
-              <div>
-                <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="ticketCodeLbl">Ticket Code</div>
-                <div class="text-xl font-extrabold text-slate-900 mono" id="ticketCode">—</div>
-              </div>
-
               <div>
                 <div class="text-xs tracking-wider uppercase text-slate-500" data-i18n="subjectLbl">Subject</div>
                 <div class="text-base font-semibold text-slate-900" id="subject">—</div>
@@ -215,7 +143,7 @@
       </div>
 
       <!-- Replies -->
-      <div class="mt-6 card bg-white rounded-2xl overflow-hidden border border-slate-200">
+      <div class="replies-card mt-6 card bg-white rounded-2xl overflow-hidden border border-slate-200">
         <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
           <div class="text-lg font-extrabold text-slate-900" data-i18n="repliesHeader">Replies</div>
           <span id="replyCount" class="badge px-3 py-1.5 rounded-full text-xs font-bold text-slate-700">0</span>
@@ -230,7 +158,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="privacy.js"></script>
   <script>
