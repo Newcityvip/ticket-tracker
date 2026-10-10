@@ -41,6 +41,34 @@ for (const script of scripts) {
     });
     await page.goto('https://tracker.test/?code=123');
     await page.waitForFunction(() => document.getElementById('replyCount').textContent === '3');
+    const subjectFailures = await page.evaluate(() => {
+      const cases = [
+        ['AFF | J1 | New Affiliate Sign Up link Request', 'New Affiliate Sign Up link Request'],
+        ['M1 | Player Account Number Delete Request', 'Player Account Number Delete Request'],
+        ['M2 | Deposit Follow Up', 'Deposit Follow Up'],
+        ['K1 | Affiliate Email Verification Request', 'Affiliate Email Verification Request'],
+        ['  aFf  | j12|  Deposit Follow Up  ', 'Deposit Follow Up'],
+        ['Player Withdrawal Issue', 'Player Withdrawal Issue'],
+        ['Deposit | Follow Up', 'Deposit | Follow Up'],
+        ['AFF | M2 | Deposit | Follow Up', 'Deposit | Follow Up'],
+        ['AFF | Deposit | J1', 'Deposit | J1'],
+        ['UNKNOWN | Deposit Follow Up', 'UNKNOWN | Deposit Follow Up'],
+        ['AFF team | Deposit Follow Up', 'AFF team | Deposit Follow Up'],
+        ['AFF | J1', 'AFF | J1'], ['M1 | ', 'M1 | '], ['AFF', 'AFF'],
+        ['', ''], [null, ''], [undefined, '']
+      ];
+      const failures = cases.filter(([input, expected]) => formatSubject(input) !== expected);
+      for (const [subject, expected] of cases) {
+        const payload = { success: true, ticket: { subject } };
+        const original = JSON.stringify(payload);
+        renderTicket(payload);
+        if (document.getElementById('subject').textContent !== (displayText(expected) || '—')) failures.push(['render', subject]);
+        if (JSON.stringify(payload) !== original) failures.push(['mutation', subject]);
+      }
+      renderTicket(lastPayload);
+      return failures;
+    });
+    assert.deepEqual(subjectFailures, [], 'subject display cleanup');
     const result = await page.evaluate(() => {
       const cases = [
         ['Username: exampleuser', 'Username: e*********r'],

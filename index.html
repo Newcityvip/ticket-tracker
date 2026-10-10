@@ -287,6 +287,16 @@
       } catch { return "—"; }
     }
 
+    function formatSubject(value) {
+      const original = String(value ?? "");
+      const parts = original.split("|");
+      // Recognized internal team codes only; stop at the first issue segment.
+      let first = 0;
+      while (first < parts.length && /^(?:AFF|[JMK]\d+)$/i.test(parts[first].trim())) first++;
+      const issue = parts.slice(first).join("|").trim();
+      return first > 0 && issue ? issue : original;
+    }
+
     function displayText(value) {
       return maskSensitiveText(value).replaceAll('[Attachment hidden]', I18N[getLang()].attachmentHidden);
     }
@@ -424,7 +434,7 @@
       }
 
       document.getElementById("ticketCode").textContent = tk.code ?? "—";
-      document.getElementById("subject").textContent = displayText(tk.subject) || "—";
+      document.getElementById("subject").textContent = displayText(formatSubject(tk.subject)) || "—";
       document.getElementById("createdAt").textContent = formatDT(tk.created_at);
       document.getElementById("priority").textContent = priorityLabel(tk.priority);
       document.getElementById("updatedAt").textContent = formatDT(tk.updated_at);
