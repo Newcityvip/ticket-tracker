@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ticket Tracking</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
 
   <style>
     :root { color-scheme: light; }
@@ -39,6 +39,47 @@
       transform: rotate(45deg);
       border-radius: 2px;
     }
+
+    body { font-family: "Segoe UI", "Nirmala UI", system-ui, sans-serif; color: #17233c; background: radial-gradient(ellipse at 10% 0%, #e6edff 0, transparent 45%), #f4f6fa; line-height: 1.65; }
+    body > div { max-width: 1120px !important; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.65rem) !important; letter-spacing: -.04em; }
+    .card { box-shadow: 0 8px 32px #152b4d08; }
+    #gateWrap { max-width: 700px; margin: 3.5rem auto; border-radius: 24px; }
+    #gateWrap > div:first-child { background: #f8faff; padding: 2rem; }
+    #gateWrap > div:last-child { padding: 2rem; }
+    #gateWrap .max-w-md { max-width: none; }
+    #gateInput { font-size: 1.3rem; letter-spacing: .12em; background: #f8faff; }
+    #dashWrap > .card { border-radius: 22px; }
+    #dashWrap > .card > div:first-child { background: #fafbfe; }
+    #ticketCode { font-size: 1.8rem; letter-spacing: -.025em; color: #3349a5; }
+    #subject { font-size: 1.15rem; }
+    #description, #subject, .message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #description { padding: 1.25rem; line-height: 1.85; background: #f8faff; }
+    .grid > *, #repliesList > div > div { min-width: 0; }
+    #repliesList > div > div { max-width: 85%; }
+    .bubble-left, .bubble-right { box-shadow: none; padding: 1.25rem; }
+    .bubble-left { background: #f1f4ff; border-color: #dce3fc; border-bottom-left-radius: 5px; }
+    .bubble-right { background: #f0f8f5; border-color: #d6e9df; border-bottom-right-radius: 5px; }
+    .bubble-left:before, .bubble-right:before { display: none; }
+    .message-text { line-height: 1.85; font-size: .95rem; }
+    #repliesList .mt-3 { flex-wrap: wrap; }
+    #repliesEmpty { padding: 2rem 1rem; text-align: center; border: 1px dashed #d4dce9; border-radius: 14px; background: #fafbfe; }
+    button { transition: background-color .15s, box-shadow .15s; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #6479db; outline-offset: 3px; }
+    button:disabled { opacity: .55; cursor: wait; }
+    #statusPill { white-space: normal; text-align: center; }
+    [aria-busy="true"] #loadState { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .55; } }
+    @media(min-width:768px) { .grid > div + div { border-left: 1px solid #e6eaf1; padding-left: 2rem; } }
+    @media(max-width:480px) {
+      body > div { padding: 1.5rem 1rem !important; }
+      #dashWrap .px-6, #gateWrap > div { padding-left: 1rem; padding-right: 1rem; }
+      #dashWrap > .card > div:first-child { flex-wrap: wrap; gap: .75rem; }
+      #repliesList > div > div { max-width: 96%; }
+      .bubble-left, .bubble-right { padding: 1rem; }
+      #btnChangeCode { padding: .65rem 1rem; }
+    }
+    @media(prefers-reduced-motion:reduce) { *, *:before { animation: none !important; transition: none !important; } }
   </style>
 </head>
 
@@ -76,14 +117,14 @@
 
       <div class="px-6 py-6">
         <div class="max-w-md">
-          <label class="text-xs tracking-wider uppercase text-slate-500" data-i18n="gateInputLbl">Ticket Code</label>
+          <label for="gateInput" class="text-xs tracking-wider uppercase text-slate-500" data-i18n="gateInputLbl">Ticket Code</label>
           <input id="gateInput"
             inputmode="numeric"
             autocomplete="one-time-code"
             placeholder="xxxx"
             class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 font-semibold mono focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
-          <div id="gateError" class="hidden mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
+          <div id="gateError" role="alert" class="hidden mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
 
           <div class="mt-4 flex items-center gap-2">
             <button id="btnGateSubmit"
@@ -103,7 +144,8 @@
     </div>
 
     <!-- DASHBOARD (hidden until code submitted) -->
-    <div id="dashWrap" class="hidden">
+    <div id="dashWrap" class="hidden" aria-busy="false">
+      <div id="loadState" role="status" class="mt-6 text-sm text-slate-600"></div>
       <!-- Main Card -->
       <div class="mt-8 card bg-white rounded-2xl overflow-hidden border border-slate-200">
         <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
@@ -168,7 +210,7 @@
             <span id="lastChecked" class="mono">—</span>
           </div>
 
-          <div id="ticketError" class="hidden mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
+          <div id="ticketError" role="alert" class="hidden mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-semibold"></div>
         </div>
       </div>
 
@@ -190,6 +232,7 @@
     </div>
   </div>
 
+  <script src="privacy.js"></script>
   <script>
     /***********************
      * CONFIG
@@ -227,7 +270,9 @@
         gateSubtitle: "ড্যাশবোর্ড দেখতে আপনার টিকিট কোড লিখুন।",
         gateInputLbl: "টিকিট কোড",
         gateSubmit: "টিকিট দেখুন",
-        gateClear: "মুছুন"
+        gateClear: "মুছুন",
+        loading: "টিকিট লোড হচ্ছে…", loadError: "টিকিট লোড করা যায়নি। আবার চেষ্টা করুন।", attachmentHidden: "[সংযুক্তি লুকানো হয়েছে]",
+        low: "কম", normal: "সাধারণ", medium: "মাঝারি", high: "উচ্চ", urgent: "জরুরি"
       },
       en: {
         title: "Ticket Tracking",
@@ -255,7 +300,9 @@
         gateSubtitle: "Please enter your ticket code to view the dashboard.",
         gateInputLbl: "Ticket Code",
         gateSubmit: "View Ticket",
-        gateClear: "Clear"
+        gateClear: "Clear",
+        loading: "Loading ticket…", loadError: "Unable to load ticket. Please try again.", attachmentHidden: "[Attachment hidden]",
+        low: "Low", normal: "Normal", medium: "Medium", high: "High", urgent: "Urgent"
       }
     };
 
@@ -267,6 +314,7 @@
       localStorage.setItem("tt_lang", lang);
       applyLang(lang);
       styleLangButtons(lang);
+      if (lastPayload) renderTicket(lastPayload);
       const empty = document.getElementById("repliesEmpty");
       if (!empty.classList.contains("hidden")) empty.textContent = I18N[lang].noReplies;
     }
@@ -281,6 +329,8 @@
     function styleLangButtons(lang) {
       const activeCls = "bg-slate-900 text-white shadow";
       const idleCls = "text-slate-700 hover:bg-slate-50";
+      document.getElementById("btnBn").setAttribute("aria-pressed", String(lang === "bn"));
+      document.getElementById("btnEn").setAttribute("aria-pressed", String(lang === "en"));
       const btnBn = document.getElementById("btnBn");
       const btnEn = document.getElementById("btnEn");
       btnBn.className = "px-3 py-1.5 rounded-full text-sm font-semibold transition " + (lang === "bn" ? activeCls : idleCls);
@@ -309,91 +359,14 @@
       } catch { return "—"; }
     }
 
-    function cleanMessageText(input) {
-      if (!input) return "";
-      let s = String(input);
-      s = s.replaceAll("&nbsp;", " ")
-           .replaceAll("&amp;", "&")
-           .replaceAll("&lt;", "<")
-           .replaceAll("&gt;", ">")
-           .replaceAll("&quot;", '"')
-           .replaceAll("&#39;", "'");
-      s = s.replace(/<\/?[^>]+(>|$)/g, "");
-      s = s.replace(/\s+/g, " ").trim();
-      return s;
+    function displayText(value) {
+      return maskSensitiveText(value).replaceAll('[Attachment hidden]', I18N[getLang()].attachmentHidden);
     }
-
-    /***********************
-     * Masking + slip removal for DESCRIPTION only
-     ***********************/
-    function maskMiddle(str, keepStart, keepEnd) {
-      const s = String(str || "");
-      if (!s) return s;
-      const a = Math.max(0, keepStart|0);
-      const b = Math.max(0, keepEnd|0);
-      if (s.length <= a + b) return s[0] + "*".repeat(Math.max(1, s.length - 1));
-      return s.slice(0, a) + "*".repeat(Math.max(1, s.length - (a + b))) + s.slice(s.length - b);
+    function priorityLabel(value) {
+      if (value == null || value === '') return '—';
+      const key = String(value).toLowerCase();
+      return I18N[getLang()][key] || displayText(value);
     }
-    function maskEmail(email) {
-      const e = String(email || "").trim();
-      const m = e.match(/^([^@\s]+)@([^@\s]+)$/);
-      if (!m) return e;
-      const local = m[1];
-      const domain = m[2];
-      if (local.length <= 2) return maskMiddle(local, 1, 0) + "@" + domain;
-      const maskedLocal = local[0] + "*".repeat(Math.max(3, local.length - 2)) + local[local.length - 1];
-      return maskedLocal + "@" + domain;
-    }
-    function maskPhone(phone) {
-      const p = String(phone || "");
-      const digits = p.replace(/\D/g, "");
-      if (digits.length < 8) return p;
-      return maskMiddle(digits, 2, 2);
-    }
-    function maskUsername(u) {
-      const s = String(u || "").trim();
-      if (!s) return s;
-      if (s.length <= 2) return maskMiddle(s, 1, 0);
-      return maskMiddle(s, 1, 1);
-    }
-    function maskRef(ref) {
-      const s = String(ref || "").trim();
-      if (!s) return s;
-      if (s.length < 6) return maskMiddle(s, 1, 1);
-      return maskMiddle(s, 2, 2);
-    }
-    function stripSlipParts(desc) {
-      let s = String(desc || "");
-      if (/data:image\/|base64,/i.test(s)) return "";
-      s = s.replace(/https?:\/\/\S+/gi, "");
-      const badWords = ["slip","screenshot","screen shot","ss","attachment","attached","image","photo","png","jpg","jpeg","pdf"];
-      const parts = s.split(/\s*\|\s*|\n+/).map(x => x.trim()).filter(Boolean);
-      const filtered = parts.filter(part => {
-        const low = part.toLowerCase();
-        if (badWords.some(w => low.includes(w))) return false;
-        if (/\b\w+\.(png|jpg|jpeg|pdf)\b/i.test(part)) return false;
-        return true;
-      });
-      return filtered.join(" | ").trim();
-    }
-    function maskSensitiveInDescription(descRaw) {
-      let s = cleanMessageText(descRaw);
-      s = stripSlipParts(s);
-      if (!s) return "";
-      s = s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig, (m) => maskEmail(m));
-      s = s.replace(/\b(?:\+?\d[\d\s\-().]{6,}\d)\b/g, (m) => {
-        const digits = m.replace(/\D/g, "");
-        if (digits.length >= 8 && digits.length <= 16) return maskPhone(m);
-        return m;
-      });
-      s = s.replace(/\b(username)\s*:\s*([A-Za-z0-9._-]{2,})\b/ig, (all, k, v) => `${k}: ${maskUsername(v)}`);
-      s = s.replace(/\b(player\s*no|player\s*number|reference\s*no|reference|ref)\s*:\s*([A-Za-z0-9]{6,})\b/ig,
-        (all, k, v) => `${k}: ${maskRef(v)}`
-      );
-      s = s.replace(/\b[A-Za-z0-9]{10,40}\b/g, (tok) => maskRef(tok));
-      return s.trim();
-    }
-
     function setStatusPill(statusRaw) {
       const pill = document.getElementById("statusPill");
       const status = String(statusRaw || "UNKNOWN").toUpperCase();
@@ -480,40 +453,8 @@
 
       return true;
     }
-function maskSensitiveInReply(raw) {
-  let s = cleanMessageText(raw);
-  if (!s) return "";
-
-  // Mask sensitive fields while preserving their labels.
-  const sensitiveLabels =
-    /(\b(?:affiliate\s*username|player\s*username|username|email|e-mail|phone(?:\s*number)?|mobile(?:\s*number)?|request\s*no\s*delete|account\s*(?:no|number)|reference\s*(?:no|number)?|ref\s*no)\s*:\s*)([^|;\n]+?)(?=\s*\|\s*|\s*;\s*|\s+(?:affiliate\s*username|player\s*username|username|email|e-mail|phone(?:\s*number)?|mobile(?:\s*number)?|request\s*no\s*delete|account\s*(?:no|number)|reference\s*(?:no|number)?|ref\s*no)\s*:|$)/gi;
-
-  s = s.replace(sensitiveLabels, (full, label, value) => {
-    const v = value.trim();
-
-    if (!v) return label;
-
-    if (v.includes("@")) {
-      return label + maskEmail(v);
-    }
-
-    if (/^\+?[\d\s()-]{8,}$/.test(v)) {
-      return label + maskPhone(v);
-    }
-
-    return label + maskUsername(v);
-  });
-
-  // Mask email addresses appearing outside labelled fields.
-  s = s.replace(
-    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
-    email => email.includes("*") ? email : maskEmail(email)
-  );
-
-  return s;
-}
     function getMessageBody(msg) {
-      return cleanMessageText(msg?.message || msg?.content || msg?.text || msg?.body || "");
+      return msg?.message || msg?.content || msg?.text || msg?.body || "";
     }
     function isRealText(body) {
       const s = String(body || "").trim();
@@ -526,9 +467,10 @@ function maskSensitiveInReply(raw) {
     /***********************
      * API
      ***********************/
-    async function apiFetchTicket(code) {
+    async function apiFetchTicket(code, signal) {
       const url = `${API_BASE}${API_BASE.includes("?") ? "&" : "?"}code=${encodeURIComponent(code)}&format=json`;
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { cache: "no-store", signal });
+      if (!res.ok) throw new Error("Request failed");
       return await res.json();
     }
 
@@ -554,13 +496,13 @@ function maskSensitiveInReply(raw) {
       }
 
       document.getElementById("ticketCode").textContent = tk.code ?? "—";
-      document.getElementById("subject").textContent = tk.subject || "—";
+      document.getElementById("subject").textContent = displayText(tk.subject) || "—";
       document.getElementById("createdAt").textContent = formatDT(tk.created_at);
-      document.getElementById("priority").textContent = tk.priority || "—";
+      document.getElementById("priority").textContent = priorityLabel(tk.priority);
       document.getElementById("updatedAt").textContent = formatDT(tk.updated_at);
       document.getElementById("closedAt").textContent = tk.closed_time ? formatDT(tk.closed_time) : "—";
 
-      const descMasked = maskSensitiveInDescription(tk.description || tk.note || "");
+      const descMasked = displayText(tk.description || tk.note || "");
       document.getElementById("description").textContent = descMasked || "—";
 
       setStatusPill(tk.status);
@@ -581,7 +523,7 @@ function escapeReplyHtml(value) {
       const lang = getLang();
       const t = I18N[lang];
 
-      const cleanedThread = (Array.isArray(thread) ? thread : []).filter(msg => isRealText(getMessageBody(msg)));
+      const cleanedThread = (Array.isArray(thread) ? thread : []).filter(msg => isRealText(cleanMessageText(getMessageBody(msg))));
 
       document.getElementById("replyCount").textContent = String(cleanedThread.length);
 
@@ -601,7 +543,7 @@ function escapeReplyHtml(value) {
 
       list.innerHTML = cleanedThread.map(msg => {
         const when = formatDT(msg.created_at || msg.createdAt || msg.time || msg.timestamp);
-       const body = escapeReplyHtml(maskSensitiveInReply(getMessageBody(msg)));
+       const body = escapeReplyHtml(displayText(getMessageBody(msg)));
         const support = isSupportMessage(msg);
 
         if (support) {
@@ -609,7 +551,7 @@ function escapeReplyHtml(value) {
             <div class="flex justify-start">
               <div class="max-w-xl w-full sm:w-auto">
                 <div class="relative bubble-left rounded-2xl p-4 card border border-indigo-200 bg-indigo-50">
-                  <div class="text-slate-900 font-semibold break-words">${body}</div>
+                  <div class="message-text text-slate-900 break-words">${body}</div>
                   <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
                     <span class="badge px-2 py-0.5 rounded-full bg-white text-indigo-700 font-extrabold">${t.affiliateSupport}</span>
                     <span class="mono">${when}</span>
@@ -624,7 +566,7 @@ function escapeReplyHtml(value) {
           <div class="flex justify-end">
             <div class="max-w-xl w-full sm:w-auto">
               <div class="relative bubble-right rounded-2xl p-4 card border border-emerald-200 bg-emerald-50">
-                <div class="text-slate-900 font-semibold break-words">${body}</div>
+                <div class="message-text text-slate-900 break-words">${body}</div>
                 <div class="mt-3 flex items-center justify-end gap-2 text-xs text-slate-500">
                   <span class="mono">${when}</span>
                   <span class="badge px-2 py-0.5 rounded-full bg-white text-emerald-700 font-extrabold">${t.user}</span>
@@ -640,28 +582,50 @@ function escapeReplyHtml(value) {
      * App State
      ***********************/
     let currentCode = "";
+    let lastPayload = null;
+    let activeRequest = null;
+    let generation = 0;
 
     async function load() {
-      const lang = getLang();
-      const t = I18N[lang];
-
-      if (!API_BASE) return;
-      if (!currentCode) return;
-
-      showError("");
-
+      if (!currentCode || activeRequest) return;
+      const request = { generation, code: currentCode, controller: new AbortController() };
+      activeRequest = request;
+      const button = document.getElementById('btnRefresh');
+      button.disabled = true;
+      document.getElementById('dashWrap').setAttribute('aria-busy', 'true');
+      document.getElementById('loadState').textContent = I18N[getLang()].loading;
+      showError('');
       try {
-        const payload = await apiFetchTicket(currentCode);
+        const payload = await apiFetchTicket(request.code, request.controller.signal);
+        if (request.generation !== generation) return;
+        lastPayload = payload;
         renderTicket(payload);
-
-        if (payload && payload.success === false) {
-          showError(payload.error || t.ticketNotFound);
+        if (!payload || payload.success !== true || !(payload.ticket || payload.data?.ticket)) {
+          showError(I18N[getLang()].ticketNotFound);
         }
       } catch (e) {
-        showError("Error loading ticket. Please try again.");
+        if (request.generation === generation && e.name !== 'AbortError') showError(I18N[getLang()].loadError);
       } finally {
-        document.getElementById("lastChecked").textContent = formatDT(new Date().toISOString());
+        if (activeRequest === request) {
+          activeRequest = null;
+          button.disabled = false;
+          document.getElementById('dashWrap').setAttribute('aria-busy', 'false');
+          document.getElementById('loadState').textContent = '';
+          document.getElementById('lastChecked').textContent = formatDT(new Date().toISOString());
+        }
       }
+    }
+    function changeTicket(code) {
+      generation++;
+      activeRequest?.controller.abort();
+      activeRequest = null;
+      currentCode = code;
+      lastPayload = null;
+      renderTicket(null);
+      document.getElementById('lastChecked').textContent = '—';
+      setQueryParam('code', code);
+      showGate(false);
+      load();
     }
 
     function submitCodeFromGate(code) {
@@ -675,14 +639,7 @@ function escapeReplyHtml(value) {
       }
 
       gateError("");
-      currentCode = cleaned;
-      setQueryParam("code", cleaned);
-
-      // show dashboard only after submit
-      showGate(false);
-      document.getElementById("ticketCode").textContent = cleaned;
-
-      load();
+      changeTicket(cleaned);
     }
 
     function promptChangeCode() {
@@ -706,9 +663,7 @@ function escapeReplyHtml(value) {
         return;
       }
 
-      currentCode = cleaned;
-      setQueryParam("code", cleaned);
-      load();
+      changeTicket(cleaned);
     }
 
     document.getElementById("btnRefresh").addEventListener("click", load);
